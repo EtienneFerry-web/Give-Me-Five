@@ -29,7 +29,21 @@
         public function policy(){
             $this->_display("policy");
         }
-        //Page Contact
+
+        /**
+         * @brief Handles the contact form submission and email dispatch.
+         * * @details This method processes the public contact form:
+         * 1. **Data Retrieval:** Captures name, email, subject, and message from the POST request.
+         * 2. **Input Validation:** * - Checks for mandatory presence of all fields.
+         * - Validates the email address against standard formats using filter_var.
+         * 3. **Data Preparation:** If validation passes, it maps the input to the internal data array for the email template.
+         * 4. **Email Configuration:** * - Sets the recipient address and subject line.
+         * - Generates the email body by rendering the "mailMessage" view.
+         * 5. **Transmission:** Attempts to send the email via the internal _sendMail helper.
+         * 6. **Feedback:** Redirects with a success message on completion or returns to the form with error notifications.
+         * @return void
+         */
+
         public function contact(){
 
             if (count($_POST)>0){
@@ -82,7 +96,6 @@
                 $this->_arrData['arrError'] = $arrError;
             }
 
-			// Afficher
 			$this->_display("contact");
         }
 

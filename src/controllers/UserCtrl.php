@@ -13,18 +13,21 @@
 
     use DateTime;
 
-    /**
-     * User authentication
-     * @author Etienne
-     *
-     * 1. Collect credentials from the POST request
-     * 2. Validate if the email and password fields are filled
-     * 3. If valid, verify credentials against the database
-     * 4. If authenticated, start session and redirect; else, manage failed attempts and lockout timer
-     */
-
-
     class UserCtrl extends MotherCtrl{
+
+        /**
+         * @brief Monitors and manages user session expiration based on activity.
+         * * @details This security method implements a sliding session window:
+         * 1. **Time Comparison:** Initializes the current timestamp to compare against the stored session expiration.
+         * 2. **Session Extension:** If the current time is before the 'last_activity' deadline, the session 
+         * is considered active, and the expiration is extended by an additional 30 minutes.
+         * 3. **Expiration Handling:** If the deadline has passed:
+         * - Sets 'last_activity' to a flag value (0).
+         * - Outputs a 'logout' signal (typically for AJAX/Frontend handling).
+         * - Terminates execution immediately to prevent unauthorized data access.
+         * * @author Marco
+         * @return void
+         */
 
         public function userActivity(){
 
@@ -41,54 +44,84 @@
 
         }
 
+        /**
+         * @brief Handles user authentication and login security.
+         * * @details This method manages the secure login process, including brute-force protection:
+         * 1. **Data Acquisition:** Retrieves the email, password, and client IP address.
+         * 2. **Brute-Force Mitigation:** Checks the database for failed attempts from the current IP. 
+         * Blocks access for 15 minutes if the threshold (5 attempts) is reached.
+         * 3. **Input Validation:** Ensures both email and password fields are populated.
+         * 4. **Credential Verification:** Checks credentials against the database.
+         * - **If invalid:** Increments failure counters, logs the attempt, and enforces a 5-minute 
+         * session restriction after 3 consecutive failures.
+         * - **If valid:** Clears existing failure records, initializes the user session, 
+         * sets a 30-minute activity timeout, and logs a successful 'LOGIN' event.
+         * 5. **View Preparation:** Passes errors and user data back to the login template if redirection doesn't occur.
+         * * @author Etienne
+         * @return void
+         */
+
         public function login(){
 
             $strEmail       = $_POST['email']??"";
             $strPwd         = $_POST['pwd']??"";
+            $ipAddress      = $_SERVER['REMOTE_ADDR'];
+
 
             $objUser            = new UserEntity;
             $objUserModel       = new UserModel;
             $objUser->hydrate($_POST);
 
             $arrError = [];
-            if (count($_POST) > 0) {
 
-                if ($strEmail == ""){
-                    $arrError['email'] = "Le mail est obligatoire";
-                }
-                if ($strPwd == ""){
-                    $arrError['pwd'] = "Le mot de passe est obligatoire";
-                }
+            $failedAttempts = $objUserModel->getFailedAttempts($ipAddress);
 
-                if (count($arrError) == 0 ){
-                    $arrResult = $objUserModel->verifUser($strEmail, $strPwd);
-                    if ($arrResult === false){//If database return nothing
-                            $arrError[] = "Mail ou mot de passe invalide";
 
-                            $_SESSION['pwdError']['nbr'] += 1;
+            if($failedAttempts >= 5) {
+                $arrError[] = "Trop de tentatives de connexion échoues. Par sécurité votre accès est bloqué pour 15 minutes";
+            } else {
+                if (count($_POST) > 0) {
 
-                            if($_SESSION['pwdError']['nbr'] > 3){
+                    if ($strEmail == ""){
+                        $arrError['email'] = "Le mail est obligatoire";
+                    }
+                    if ($strPwd == ""){
+                        $arrError['pwd'] = "Le mot de passe est obligatoire";
+                    }
+
+                    if (count($arrError) == 0 ){
+                        $arrResult = $objUserModel->verifUser($strEmail, $strPwd);
+                        if ($arrResult === false){
+                                $arrError[] = "Mail ou mot de passe invalide";
+
+                                $objUserModel->addFailedAttempts($ipAddress);
+
+                                $_SESSION['pwdError']['nbr'] += 1;
+
+                                if($_SESSION['pwdError']['nbr'] > 3){    
                                 $_SESSION['pwdError']['restrict'] = new DateTime('+5 minutes');
-                            }
-                        }else{
+                                }
+                            }else{
 
-                            $_SESSION['user']       = $arrResult;
-                            $_SESSION['success']    = "Bienvenue, vous êtes bien connecté";
-                            $_SESSION['last_activity']    = new DateTime('+30 minutes');
+                                $objUserModel->clearLoginAttempts($ipAddress);
 
-                            $arrData = array (
-                                'userId'  => $_SESSION['user']['user_id'],
-                                'event'   => 'LOGIN',
-                                'ip'      => $_SERVER['REMOTE_ADDR'],
-                                'agent'   => $_SERVER['HTTP_USER_AGENT'] ?? 'Inconnu'
-                            );
+                                $_SESSION['user']       = $arrResult;
+                                $_SESSION['success']    = "Bienvenue, vous êtes bien connecté";
+                                $_SESSION['last_activity']    = new DateTime('+30 minutes');
 
-                            $objUserModel->addLogs($arrData);
-                            $this->_redirect();
+                                $arrData = array (
+                                    'userId'  => $_SESSION['user']['user_id'],
+                                    'event'   => 'LOGIN',
+                                    'ip'      => $_SERVER['REMOTE_ADDR'],
+                                    'agent'   => $_SERVER['HTTP_USER_AGENT'] ?? 'Inconnu'
+                                );
+
+                                $objUserModel->addLogs($arrData);
+                                $this->_redirect();
+                        }
                     }
                 }
             }
-            
             $this->_arrData['objUser'] = $objUser;
             $this->_arrData['arrError'] = $arrError;
             $this->_arrData['strEmail'] = $strEmail;
@@ -97,13 +130,15 @@
         }
 
         /**
-         * Terminate user session
-         * @author Marco & Etienne
-         *
-         * 1. Initialize session access
-         * 2. Remove user data from the session
-         * 3. Set a success message for the redirection
-         * 4. Redirect the user to the homepage
+         * @brief Terminates the current user session and logs the event.
+         * * @details This method performs the following security and session cleanup steps:
+         * 1. **Audit Logging:** Records the logout event in the database, including user ID, IP address, and User Agent.
+         * 2. **Inactivity Check:** Determines if the logout was triggered by session timeout (last_activity == 0).
+         * 3. **Session Cleanup:** Removes user-specific data and activity timestamps from the $_SESSION superglobal.
+         * 4. **Feedback & Redirection:** * - If timed out: Sets an inactivity message and redirects to the login page.
+         * - If manual: Sets a success message and redirects to the homepage.
+         * * @author Marco & Etienne
+         * @return void
          */
 
         public function logout(){
@@ -118,8 +153,6 @@
             );
 
             $objUserModel->addLogs($arrData);
-            // Cleaning session from User
-
 
             if($_SESSION['last_activity'] == 0){
                 $_SESSION['success']  = "Vous avez êtes déconnecté pour inactivité !";
@@ -137,14 +170,18 @@
         }
 
         /**
-        * Create account
-        * @author Etienne
-        *
-        * 1. Collect information from the form
-        * 2. Test if the form is correctly filled
-        * 3. If the form is correctly filled, add of the information in the database, else ERROR
-        *
-        */
+         * @brief Handles the user registration process.
+         * * @details This method manages the end-to-end account creation flow:
+         * 1. **Data Collection:** Collects raw input from the registration form and hydrates a UserEntity.
+         * 2. **Field Validation:** Performs mandatory checks on name, firstname, pseudo, and email format.
+         * 3. **Age Verification:** Validates the birthdate to ensure the user meets the minimum age requirement (8 years old).
+         * 4. **Security Validation:** Delegates password strength and confirmation checks to the internal _verifPwd method.
+         * 5. **Persistence & Conflict Check:** Attempts to insert the new user into the database. If the insertion fails due to 
+         * duplicate unique keys (email or pseudo), it adds specific error messages.
+         * 6. **Finalization:** Redirects to the login page on success or re-renders the form with error feedback.
+         * * @author Etienne
+         * @return void
+         */
 
         public function createAccount(){
 
@@ -160,10 +197,11 @@
             $objUser->hydrate($_POST);
 
             $arrError = [];
-
+            var_dump($_SESSION);
             if (count($_POST) > 0) {
-
-               
+                
+                $birthdate = $objUser->getBirthdate();
+                var_dump($birthdate);
 
                 if ($objUser->getName() == ""){
                     $arrError['name'] = "Le nom est obligatoire";
@@ -174,57 +212,36 @@
                 if ($objUser->getPseudo() == ""){
                     $arrError['pseudo'] = "Le pseudo est obligatoire";
                 }
-                if ($objUser->getBirthdate() == ""){
-                    $arrError['birthdate'] = "La date de naissance est obligatoire";
+                if ($birthdate == ""){
+                    $arrError['birthdate'] = "La date de naissance est obligatoire.";
+                } else {
+
+                    $limitDate = date("Y-m-d", strtotime("-8 years"));
+                    
+                    if ($objUser->getBirthdate() > $limitDate) {
+                        $arrError['birthdate'] = "Vous devez avoir plus de 8 ans.";
+                    }
+
                 }
                 if ($objUser->getEmail() == ""){
                     $arrError['email'] = "Le mail est obligatoire";
                 }else if (!filter_var($objUser->getEmail(), FILTER_VALIDATE_EMAIL)){
                     $arrError['email'] = "Le format du mail n'est pas correct";
                 }
-
-                $password = $objUser->getPwd();
-
-
-                if ($password == "") {
-                    $arrError['pwd'] = "Le mot de passe est obligatoire";
-                } else {
-                    if(strlen($password) < 16) {
-                        $arrError['pwd'] = "Le mot de passe doit au moins avoir 16 caractères";
-                    }
-
-                    if (!preg_match('/[A-Z]/', $password)) {
-                        $arrError['pwd'] = "Il manque une majuscule";
-                    }
-
-                    if (!preg_match('/[a-z]/', $password)) {
-                        $arrError['pwd'] = "Il manque une minuscule";
-                    }
-
-                    if (!preg_match('/[0-9]/', $password)) {
-                        $arrError['pwd'] = "Il manque au moins un chiffre";
-                    }
-
-                    if (!preg_match('/[#?!@$%^&*-]/', $password)) {
-                        $arrError['pwd'] = "Il manque un caractère spécial (#?!@$%^&*-)";
-                    }
-
-                    if ($password != $strPwdConfirm){
-                        $arrError['pwd_confirm'] = "Le mot de passe et sa confirmation ne sont pas identiques";
-                    }
-                }
-
-                //If form is correctly filled
+                //use verifypwd for regex
+                $pwdErrors = $this->_verifPwd($objUser, $strPwdConfirm);
+                $arrError = array_merge($arrError, $pwdErrors);
+                
                 if (count($arrError) == 0){
-                    //Database add
+            
                     $objUserModel   = new UserModel;
                     $boolInsert     = $objUserModel->insert($objUser);
 
                     if($boolInsert != true && $boolInsert['user_email'] == $objUser->getEmail()){
-                        $arrError[] = 'Adresse mail ou Mots de passe Invalide !';
+                        $arrError[] = "Adresse mail ou Mots de passe Invalide !";
                     }
                     if($boolInsert != true  && $boolInsert['user_pseudo'] == $objUser->getPseudo()){
-                       $arrError[] = 'pseudo probleme change';
+                       $arrError[] = "Ce pseudonyme est déja utilisé !";
                     }
 
                     if ($boolInsert != false && count($arrError) == 0){
@@ -245,19 +262,20 @@
             $this->_arrData['strEmail']     = $strEmail;
             $this->_arrData['arrError']     = $arrError;
             $this->_arrData['objUser']      = $objUser;
-            // Afficher
+
             $this->_display("createAccount");
         }
 
         /**
-         * Validate user information
-         * @author Etienne
-         *
-         * 1. Initialize an empty error array
-         * 2. Check if name, firstname, and pseudo are provided
-         * 3. Validate email presence and verify correct email format
-         * 4. Return the list of identified validation errors
-         *
+         * @brief Validates the basic user profile information.
+         * * @details This internal validation method checks for the presence and format of mandatory fields:
+         * 1. **Initialization:** Prepares an empty array to collect validation errors.
+         * 2. **Required Fields:** Verifies that 'name', 'firstname', and 'pseudo' are not empty.
+         * 3. **Email Validation:** Checks if the email is provided and ensures it follows a valid standard format.
+         * 4. **Output:** Returns an associative array containing all identified errors.
+         * * @author Etienne
+         * @param object $objUser The user entity or object containing the data to be validated.
+         * @return array An associative array of error messages, where keys match the field names.
          */
 
         private function verifInfos(object $objUser):array {
@@ -282,15 +300,19 @@
         }
 
         /**
-         * Update user profile settings
-         * @author Etienne
-         *
-         * 1. Check if the user is authenticated, otherwise redirect to 403 error
-         * 2. Retrieve and hydrate user data from the database or session
-         * 3. Process form submission: validate text fields and handle image upload
-         * 4. Verify password strength (length, case, numbers, special characters) and confirmation
-         * 5. If no errors, update the database and refresh the session data
-         *
+         * @brief Updates the authenticated user's profile settings.
+         * * @details This method manages the self-service profile update flow:
+         * 1. **Authentication:** Verifies the user is logged in (redirects to 403 otherwise).
+         * 2. **Data Hydration:** Retrieves existing user data from the database and populates the UserEntity.
+         * 3. **Input Processing:** If a POST request is detected, it hydrates the entity with new data and validates text fields.
+         * 4. **Media Management:** Handles profile picture uploads, enforcing JPEG/PNG formats and generating unique filenames.
+         * 5. **Security Validation:** If a new password is provided, it enforces strict complexity rules:
+         * - Minimum 16 characters.
+         * - Must contain uppercase, lowercase, numbers, and special characters.
+         * - Must match the password confirmation string.
+         * 6. **Persistence:** If no validation errors occur, updates the database and synchronizes the session data.
+         * * @author Etienne
+         * @return void Handles redirects or renders the settings view.
          */
 
         public function settingsUser() {
@@ -387,15 +409,19 @@
         }
 
         /**
-         * Display and manage user profile interactions
-         * @author Marco & Etienne
-         *
-         * 1. Retrieve profile data and verify if the user exists (404 if not)
-         * 2. Handle comment management: deletion, modification, and reporting
-         * 3. Process social interactions: liking reviews and marking spoilers
-         * 4. Manage user-to-user reporting and report deletion
-         * 5. Fetch and hydrate lists of liked movies and user reviews for display
-         *
+         * @brief Displays and manages all user profile interactions and social data.
+         * * @details This comprehensive controller method handles the profile lifecycle:
+         * 1. **Data Acquisition:** Retrieves the profile owner's data and redirects to a 404 if the user is not found.
+         * 2. **Comment Management:** Handles deletion, modification, and reporting of user reviews/comments.
+         * 3. **Social Interactions:** Manages "Likes" on reviews, spoiler flagging, and image deletion from the user's movie gallery.
+         * 4. **Safety & Moderation:** Processes user-to-user reports and allows users to manage or delete their existing reports.
+         * 5. **Collection Rendering:** Fetches and hydrates several object collections for the view:
+         * - The user's list of liked movies.
+         * - The user's uploaded movie photos.
+         * - All reviews/comments written by the user.
+         * - User-specific statistics (counts of likes, comments, etc.).
+         * * @author Marco & Etienne
+         * @return void Renders the "user" view or handles redirects for POST actions.
          */
 
         public function userPage() {
@@ -418,12 +444,14 @@
             $arrError = [];
 
             if (isset($_POST['deleteImage']) && isset($_SESSION['user'])) {
-                $result = $objUserModel->deletephotoMovieOfUser($_POST['deleteImage'], $_SESSION['user']['user_id']);
+                $result = $objUserModel->deletePhotoMovieOfUser($_POST['deleteImage'], $_SESSION['user']['user_id']);
 
                 if ($result) {
                     $_SESSION['success'] = "L'image à bien était supprimer !";
+                    $this->_selfRedirect();
                 } else {
                     $arrError[] = "erreur lors de la suppression veulliez réssayer !";
+                    
                 }
             }
 
@@ -436,6 +464,7 @@
 
                 if ($result) {
                     $_SESSION['success'] = "Le commentaire à bien était supprimer !";
+                    $this->_selfRedirect();
                 } else {
                     $arrError[] = "erreur lors de la suppression veulliez réssayer !";
                 }
@@ -462,8 +491,7 @@
 
                 if ($repResult) {
                     $_SESSION['success'] = "Le signalement a bien été envoyé !";
-                    header("Location: index.php?ctrl=user&action=user&id=" . $intId);
-                    exit;
+                    $this->_selfRedirect();
                 }  else {
                     $arrError[] = "erreur";
                 }
@@ -477,6 +505,7 @@
 
                     if ($repResult) {
                         $_SESSION['success'] = "Votre signalement a bien était supprimer ! !";
+                        $this->_selfRedirect();
                     }  else {
                         $arrError[] = "erreur";
                     }
@@ -488,21 +517,17 @@
 
 					if ($repResult === 1) {
 						$_SESSION['success'] = "Votre like a bien été pris en compte !";
-                        header("Location: index.php?ctrl=user&action=user&id=" . $intId);
-                        exit;
+                        $this->_selfRedirect();
 					} else if($repResult === 2) {
 						$_SESSION['success'] = "Votre like a bien été était supprimer !";
+                        $this->_selfRedirect();
 					}
-
-    			}elseif(isset($_POST['likeReviewBtn']) && !isset($_SESSION['user'])){
-    				$arrError[''] = "Vous devez etre connecté pour liker un commentaire";
     			}
-
-
 
             if (isset($_POST['spoiler']) && $_SESSION['user']['user_funct_id'] != 1) {
                 if ($objCommentModel->addSpoiler($_POST['spoiler'])) {
                     $_SESSION['success'] = "Spoiler Update !";
+                    $this->_selfRedirect();
                 }
             }
 
@@ -520,8 +545,7 @@
 
                 if ($repResult) {
                     $_SESSION['success'] = "Le signalement a bien été envoyé !";
-                    header("Location: index.php?ctrl=user&action=user&id=" . $intId);
-                    exit;
+                    $this->_selfRedirect();
                 }  else {
                     $arrError[] = "erreur";
                 }
@@ -532,8 +556,7 @@
 
                 if ($repResult) {
                     $_SESSION['success'] = "Votre signalement a bien était supprimer ! !";
-                    header("Location: index.php?ctrl=user&action=user&id=" . $intId);
-                    exit;
+                    $this->_selfRedirect();
                 }  else {
                     $arrError[] = "erreur";
                 }
@@ -604,16 +627,20 @@
 
             $this->_display("user");
         }
+
         /**
-         * Delete user account (Self-service or Administrative)
-         * @author Etienne
-         *
-         * 1. Check authentication and retrieve user permissions (ranks)
-         * 2. If a target ID is provided, perform administrative checks (role hierarchy, existence)
-         * 3. Prevent self-deletion via admin tools and protect top-level administrators
-         * 4. Execute administrative deletion if permissions are sufficient
-         * 5. Handle self-deletion: remove user data, destroy session, and redirect to home
-         *
+         * @brief Deletes a user account (Self-service or Administrative).
+         * * @details This method handles two distinct deletion flows:
+         * * **1. Administrative Deletion (Target ID provided via GET):**
+         * - Verifies that the current user is a Moderator or Admin (Rank 2 or 3).
+         * - Prevents admins from deleting themselves via this tool (redirects to self-deletion).
+         * - Validates target existence and checks role hierarchy (cannot delete higher or equal ranks).
+         * - Protects top-level Administrators (Rank 3) from being deleted.
+         * * **2. Self-Deletion (No ID provided):**
+         * - Allows any logged-in user to delete their own account.
+         * - Clears session data, destroys the session, and prepares a farewell message.
+         * * @author Etienne
+         * @return void Handles redirects to "allUser", "error/err403", or home page.
          */
 
         public function deleteAccount(){
@@ -630,24 +657,21 @@
                 $intTargetId = (int)$_GET['id'];
 
                 if ($myRank != 2 && $myRank != 3){
-                    header("Location:index.php?ctrl=error&action=err403");
-                    exit;
+                    $this->_redirect('user/allUser');
                 }
 
 
                 if ($intTargetId == $myId){
-                    $_SESSION['error'] = "Pour supprimer votre propre compte, ne passez pas par la gestion admin.";
-                    header("Location:index.php?ctrl=admin&action=dashboard");
-                    exit;
+                    $_SESSION['success'] = "Pour supprimer votre propre compte, ne passez pas par la gestion admin.";
+                    $this->_redirect('user/allUser');
                 }
 
 
                 $arrTargetData = $objUserModel->findUser($intTargetId);
 
                 if(!$arrTargetData) {
-                    $_SESSION['error'] = "Cet utilisateur n'existe pas.";
-                    header("location:index.php?ctrl=user&action=allUser");
-                    exit;
+                    $_SESSION['success'] = "Cet utilisateur n'existe pas.";
+                    $this->_redirect('user/allUser');
                 }
 
 
@@ -657,27 +681,24 @@
 
 
                 if($targetRank == 3) {
-                    $_SESSION['error'] = "ACTION REFUSÉE : Impossible de supprimer un Administrateur.";
-                    header("location:index.php?ctrl=user&action=allUser");
-                    exit;
+                    $_SESSION['success'] = "ACTION REFUSÉE : Impossible de supprimer un Administrateur.";
+                    $this->_redirect("error/err403");
                 }
 
 
                 if($myRank <= $targetRank) {
                     $_SESSION['error'] = "Vous n'avez pas le grade suffisant pour supprimer cet utilisateur.";
-                    header("location:index.php?ctrl=user&action=allUser");
-                    exit;
+                    $this->_redirect("error/err403");
                 }
 
                 if($objUserModel->deleteUser($intTargetId)) {
                     $_SESSION['success'] = "L'utilisateur a bien été supprimé.";
+                    $this->_redirect('user/allUser');
                 } else {
-                    $_SESSION['error'] = "Erreur technique lors de la suppression.";
+                    $_SESSION['success'] = "Erreur technique lors de la suppression.";
                 }
 
-
-                header("Location:index.php?ctrl=user&action=allUser");
-                exit;
+               $this->_selfRedirect();
 
             }
 
@@ -689,37 +710,34 @@
                     session_destroy();
                     session_start();
                     $_SESSION['success'] = "Votre compte a bien été supprimé. Au revoir !";
-
-                    header("Location:index.php");
-                    exit;
+                    $this->_selfRedirect();
                 } else {
                     $_SESSION['error'] = "Erreur lors de la suppression de votre compte.";
-                    header("Location:index.php");
-                    exit;
+                    $this->_selfRedirect();
                 }
             }
         }
 
         /**
-         * Display list of all users with filtering and search
-         * @author 
-         * * 1. Retrieve search terms and filter criteria from the URL
-         * 2. Validate administrative permissions (Moderator/Admin) to restrict access
-         * 3. Fetch filtered user data from the database based on search parameters
-         * 4. Transform raw database arrays into a collection of UserEntity objects
-         * 5. Pass the object list and current filters to the view for rendering
-         * 
-         * */
+         * @brief Displays the user management list with search and filtering capabilities.
+         * * @details This controller method manages the administrative user overview:
+         * 1. Access Control: Restricts access to users with administrative privileges (level 3).
+         * 2. Parameter Retrieval: Extracts search terms and filter criteria from the URL (GET).
+         * 3. Data Acquisition: Fetches filtered user data from the database via UserModel.
+         * 4. Object Mapping: Transforms raw database arrays into a collection of UserEntity objects using hydration.
+         * 5. View Preparation: Passes the object list, search terms, and active filters to the display engine.
+         * * @author Etienne
+         * @return void
+         */
 
         public function allUser(){
+            $this->_checkAccess(3);
 
             $search = $_GET['search'] ?? NULL;
             $filter = $_GET['filter'] ?? 'all';
 
-			if (!isset($_SESSION['user']) && $_SESSION['user']['user_funct_id'] != 2 && $_SESSION['user']['user_funct_id'] != 3){ // Pas d'utilisateur connecté
-				header("Location:index.php?ctrl=error&action=err403");
-				exit;
-			}
+
+
 
 			$objUserModel 	= new UserModel;
 			$arrUsers 		= $objUserModel->findAllUsers();
@@ -743,23 +761,22 @@
 		}
 
         /**
-         * Administrative management of user profiles
-         * @author Etienne
-         *
-         * 1. Check if a user is logged in, redirecting to 403 if not
-         * 2. Retrieve target user data via GET ID or fallback to current session
-         * 3. Process form submissions and validate basic user information
-         * 4. Manage profile picture uploads with file type and destination checks
-         * 5. Update database via UserModel and refresh session data if editing own profile
-         *
+         * @brief Manages administrative user profile settings and updates.
+         * * @details This method handles the comprehensive profile editing logic:
+         * 1. Access Control: Verifies administrative privileges (level 3).
+         * 2. Data Retrieval: Fetches target user data via GET ID or defaults to the current session user.
+         * 3. Hydration: Populates the User entity with existing data and handles POST form submissions.
+         * 4. File Management: Validates and processes profile picture uploads (JPEG/PNG), 
+         * generating unique filenames and moving them to the permanent storage directory.
+         * 5. Persistence: Updates the database via UserModel and provides session feedback.
+         * 6. View Rendering: Passes error messages and the User object to the settings view.
+         * * @author Etienne
+         * @return void
          */
 
         public function settingsAllUser() {
 
-            if (!isset($_SESSION['user'])){ // Pas d'utilisateur connecté
-            header("Location:index.php?ctrl=error&action=error_403");
-            exit;
-            }
+            $this->_checkAccess(3);
 
             $objUserModel	= new UserModel;
             $arrUser		= $objUserModel->userPage($_GET['id']??$_SESSION['user']['user_id']);
@@ -807,8 +824,7 @@
                         if($objUser->getPseudo() == $_SESSION['user']['user_pseudo']){
 
                         $_SESSION['success'] = "Le profil à bien été mis à jour";
-                        header("Location:index.php?ctrl=user&action=settingsAllUser");
-                        exit;
+                        $this->_redirect("user/allUser");
                         }
                     }else{
                         $arrError[] = "Erreur lors de la mise a jours, veuillez reessayer";
@@ -824,21 +840,20 @@
         }
 
         /**
-         * Update user permission levels
-         * @author Etienne
-         *
-         * 1. Verify administrative privileges (Moderator/Admin) before allowing access
-         * 2. Capture the target user ID and the new rank ID from request data
-         * 3. Update the user's role/function within the database via the UserModel
-         * 4. Provide session feedback (success or error) based on the operation result
-         * 5. Redirect back to the user management list
-         *
+         * @brief Updates a user's permission level (rank).
+         * * @details Administrative update process:
+         * 1. Verifies administrative privileges (Moderator/Admin) before allowing the operation.
+         * 2. Captures the target user ID from the URL and the new rank ID from the POST data.
+         * 3. Updates the user's role within the database via the UserModel.
+         * 4. Provides session feedback (success or error message) based on the operation result.
+         * 5. Redirects the administrator back to the user management list.
+         * * @author Etienne
+         * @return void
          */
+
         public function updateGrade() {
-            if(!isset($_SESSION['user']) || ($_SESSION['user']['user_funct_id'] != 2 && $_SESSION['user']['user_funct_id'] != 3)) {
-                header("Location:index.php?ctrl=error&action=err403");
-                exit;
-            }
+            
+            $this->_checkAccess(3);
 
             $intIdUser      = $_GET['id']?? null;
             $intNewGrade = $_POST['user_funct_id'] ?? null;
@@ -849,24 +864,42 @@
 
                 if($success){
                     $_SESSION['success'] = "Le grade a bien été mis à jour.";
+                    $this->_redirect('user/allUser');
                 } else {
                     $_SESSION['error'] = "Erreur lors de la mise à jour";
                 }
             }
 
-            header("Location: index.php?ctrl=user&action=allUser");
+            $this->_redirect("user/allUser");
         }
 
-         /**
-		* @author Audrey
-		* Affichage de la page permission en fonction de son grade
-		*/
+        /**
+         * @brief Controls access to the permissions management page.
+         * * @details Access control flow:
+         * 1. Verifies if the user is logged in and holds a specific authorized role (ID 2 or 3).
+         * 2. If authentication or authorization fails, redirects to a 403 error page and terminates.
+         * 3. If authorized, loads and displays the permissions view.
+         * * @author Audrey
+         * @return void
+         */
 
         public function permissions() {
             $this->_checkAccess();
-
             $this->_display("permissions");
         }
+
+        /**
+         * @brief Handles password recovery requests and sends reset emails.
+         * * @details This method manages the initial stage of the "forgot password" flow:
+         * 1. Initializes the User entity and checks for incoming POST data.
+         * 2. Retrieves the submitted email and searches for a matching user in the database.
+         * 3. Sets a generic success message (Security best practice to prevent user enumeration).
+         * 4. If the user exists, generates a secure 64-character token and stores it.
+         * 5. Constructs a recovery link and prepares the email body using a template.
+         * 6. Sends the recovery email and redirects upon success, or renders the default view.
+         * * @author Etienne
+         * @return void This method handles view rendering and redirects directly.
+         */
 
         public function forgotPwd(){
 			$objUser 	= new UserEntity();
@@ -886,13 +919,12 @@
                 $_SESSION['success'] = "Si vous êtes inscrit sur notre site, vous allez recevoir un mail contenant un lien pour redéfinir votre mot de passe.";
 				
 				if ($arrUser !== false){
-					$strToken 	= bin2hex(random_bytes(64)); // Génère un token aléatoire
+					$strToken 	= bin2hex(random_bytes(64));
 					$boolOk		= $objModel->updateForgotInfos($strToken, $arrUser['user_id']);
 					if ($boolOk){
-                        //Construction lien
                         $link = $_ENV['BASE_URL']."user/recoverPwd?token=" . $strToken;
 
-						// Destinataire(s)
+				
 						$this->_objMail->addAddress($arrUser['user_email'], $arrUser['user_name'].' '.$arrUser['user_firstname']);
 						$this->_objMail->Subject    = "Mot de passe oublié";
 				
@@ -900,10 +932,11 @@
 						$this->_arrData['link']  = $link;
 						$this->_arrData['user_name']  = $arrUser['user_name'];
 
-						$this->_objMail->Body      	= $this->_display("mailForgot_pwd", false);
+						$this->_objMail->Body      	= $this->_display("mailForgotPwd", false);
 
                         if($this->_sendMail()){
-                            $_SESSION['success'] = "Ca marche !";
+                            $_SESSION['success'] = "Cliquez sur le lien que nous venons de vous envoyer par e-mail pour continuer.";
+                            $this->_selfRedirect();
                         }
                     }
 				}
@@ -911,17 +944,27 @@
 			
 			$this->_display("forgotPwd");
         }
-		/**
-		* Page de modification du mot de passe si oublié
-		*/
+
+        /**
+         * @brief Handles the password recovery process.
+         * * This controller method manages the token-based password reset flow:
+         * 1. Retrieves and validates the recovery token from the URL (redirects if missing).
+         * 2. Verifies the token against the database to identify the associated user.
+         * 3. Redirects to the forgot password page if the token is invalid or expired.
+         * 4. Upon form submission, validates the new password's complexity and confirmation.
+         * 5. If valid, updates the password in the database and redirects to the login page.
+         * 6. Renders the recovery view, passing any error messages if the process fails.
+         * * @author Etienne
+         * @return void This method handles redirects or view rendering directly.
+         */
+	
 		public function recoverPwd(){
             var_dump($_POST);
             $strToken = $_GET['token'] ?? '';
             $arrError = [];
             if(empty($strToken)){
                 $_SESSION['error'] = "Token manquant.";
-                header("Location:index.php?ctrl=user&action=login");
-                exit;
+                $this->_redirect("user/login");
             }
 
 			$objModel	= new UserModel();
@@ -929,8 +972,7 @@
 
             if($arrUser === false) {
                 $_SESSION['error'] = "Ce lien de réinitialisation est invalide ou expiré.";
-                header("Location:index.php?ctrl=user&action=forgot_pwd");
-                exit;
+                $this->_selfRedirect("user/forgotPwd");
             }
 			
 			if (count($_POST) > 0){
@@ -944,8 +986,7 @@
 					$boolOk	= $objModel->updatePwd($objUser);
 					if ($boolOk){
 						$_SESSION['success'] = "Votre mot de passe a bien été changé";
-						header("Location:index.php?ctrl=user&action=login");
-						exit;
+						$this->_redirect("user/login");
 					}else{
 						$arrError[]	= "Erreur lors du changement de mot de passe.";
 					}
@@ -958,21 +999,50 @@
 		}
 
         /**
-		* Méthode permettant de vérifier le mot de passe de l'utilisateur
-		* @param object $objUser L'utilisateur à vérifier
-		* @param string $strPwdConfirm Confirmation du mot de passe
-		* @return array Le tableau des erreurs
-		*/
-		private function _verifPwd(object $objUser, string $strPwdConfirm):array{
-			$strRegex = "/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{16,}$/";
-			if ($objUser->getPwd() == ""){
-				$arrError['pwd'] = "Le mot de passe est obligatoire";
-			}else if (!preg_match($strRegex, $objUser->getPwd())){
-				$arrError['pwd'] = "Le mot de passe ne correspond pas aux règles";
-			}else if($objUser->getPwd() != $strPwdConfirm){
-				$arrError['pwd_confirm'] = "Le mot de passe et sa confirmation ne sont pas identiques";
-			}
-			
-			return $arrError??array();			
-		}
+         * @brief Validates password complexity and confirmation.
+         * * This method performs the following validation steps:
+         * 1. Retrieves the password from the User entity.
+         * 2. Checks complexity rules (length, uppercase, lowercase, numbers, special characters).
+         * 3. Compares the password with the confirmation string.
+         * 4. Collects and returns any validation errors found.
+         * * @author Etienne
+         * @param UserEntity $objUser The user entity containing the password to validate.
+         * @param string $strPwdConfirm The confirmation string provided by the user.
+         * @return array An associative array of error messages. Empty if validation passes.
+         */
+        
+        private function _verifPwd(UserEntity $objUser, string $strPwdConfirm): array {
+            $arrError = [];
+            $password = $objUser->getPwd();
+
+            if ($password == "") {
+                $arrError['pwd'] = "Le mot de passe est obligatoire";
+            } else {
+                if (strlen($password) < 16) {
+                    $arrError['pwd'] = "Le mot de passe doit au moins avoir 16 caractères";
+                }
+
+                if (!preg_match('/[A-Z]/', $password)) {
+                    $arrError['pwd'] = "Il manque une majuscule";
+                }
+
+                if (!preg_match('/[a-z]/', $password)) {
+                    $arrError['pwd'] = "Il manque une minuscule";
+                }
+
+                if (!preg_match('/[0-9]/', $password)) {
+                    $arrError['pwd'] = "Il manque au moins un chiffre";
+                }
+
+                if (!preg_match('/[#?!@$%^&*-]/', $password)) {
+                    $arrError['pwd'] = "Il manque un caractère spécial (#?!@$%^&*-)";
+                }
+
+                if ($password != $strPwdConfirm) {
+                    $arrError['pwd_confirm'] = "Le mot de passe et sa confirmation ne sont pas identiques";
+                }
+            }
+
+            return $arrError;
+        }
 }

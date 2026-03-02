@@ -2,12 +2,10 @@
     namespace App\Dto;
 
     /**
-     * @author Marco Schmitt
-     * @class SearchDto
-     * @brief Data Transfer Object for unified search results.
-     * * Used to standardize data coming from movies, persons, and users
-     * into a single object format.
-     */
+	* @author Marco Schmitt 
+    * 27/02/2026
+    * Version 1
+    */
 
     class SearchDto extends Dto{
 
@@ -26,7 +24,6 @@
 		* Constructeur
 		*/
 		public function __construct(string $prefixe = ""){
-			// Préfixe de la table pour hydratation
 			$this->_prefixe = $prefixe;
 		}
 

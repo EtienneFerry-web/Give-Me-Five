@@ -5,7 +5,6 @@
     use App\Models\MovieModel;
     use App\Models\CommentModel;
     use App\Models\PersonModel;
-    use App\Models\UserModel;
     // Entités
     use App\Entities\MovieEntity;
     use App\Entities\ReportEntity;
@@ -13,9 +12,8 @@
     use App\Entities\PersonEntity;
 
     /**
-     * @author Marco Schmitt
-     * 16/01/2026
-     * Version 0.1
+     * 27/02/2026
+     * Version 1
      */
 
     class MovieCtrl extends MotherCtrl{
@@ -637,7 +635,6 @@
 				}
 			}
 			
-			// Loading categories for the select input
 			$arrCategory = $objMovieModel->allCategories();
 				$arrCatToDisplay	= array();
 
@@ -649,7 +646,6 @@
 				$arrCatToDisplay[]	= $objContent;
 			}
 			
-			// Loading nationalites for the select input
 			$arrNationality = $objMovieModel->allCountry();
 			$arrNatToDisplay	= array();
 

@@ -14,18 +14,20 @@
      * Version 1
      * Parent controller providing core utilities for mailing, security, and rendering.
      */
+    
     class MotherCtrl{
 
-        
         protected array $_arrData = [];
-        
         protected object $_objMail;
+        protected object $_now;
 
         /**
          * @author Marco
          * Constructor: Initializes PHPMailer and handles CSRF protection logic for requests.
          */
         public function __construct() {
+
+            $this->_now = new DateTime("-8 years");
 
             $this->_objMail = new PHPMailer(true); 
 

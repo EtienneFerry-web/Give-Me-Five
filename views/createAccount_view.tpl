@@ -66,8 +66,6 @@
                         class="form-control {if (isset($arrError['pwd_confirm']))} is-invalid {/if}"  
                         placeholder="Mots de passe de comfirmation">
             </div>
-            <input type="hidden" name="csrf_token" value="{$form_token}">
-
             <input class="w-100 btnCustom" type="submit" >
         </form>
     </section>

@@ -8,7 +8,7 @@
     {/if}
 
     <div class="col-3 my-auto">
-        <a id="movie" data-movie="{$review->getMovieId()}" href="{$smarty.env.BASE_URL}movie/movie/{$review->getMovieId()}">
+        <a id="movie" data-movie="{$review->getMovieId()}" href="{$smarty.env.BASE_URL}movie/{$review->getMovieId()}">
             <img src="{$smarty.env.BASE_URL}assets/img/movie/{$review->getPhoto()}" alt="couverture de film" class="img-fluid border-0">
         </a>
     </div>

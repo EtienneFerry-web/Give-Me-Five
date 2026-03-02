@@ -55,7 +55,6 @@
 				}
 			}
 
-			//Delete Comment
 			if (isset($_POST['deleteComment'])) {
 
                 $objComment->setId((int)$_POST['deleteComment']);

@@ -2,10 +2,10 @@
     namespace App\Dto;
 
     /**
-	 * @author Marco Schmitt 
-     * @class Dto
-     * @brief Base Data Transfer Object providing hydration and sanitization.
-     */
+	* @author Marco Schmitt 
+    * 27/02/2026
+    * Version 1
+    */
 
 
 	class Dto {
