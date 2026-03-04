@@ -182,7 +182,13 @@
      */
     public function updatePerson(object $objPerson): bool{
         $strRq = "UPDATE persons
-                   SET pers_name = :name, pers_firstname = :firstname, pers_birthdate = :birthdate, pers_deathdate = :deathdate, pers_nat_id = :nat_id, pers_photo = :photo
+                   SET  pers_name = :name, 
+                        pers_firstname = :firstname, 
+                        pers_birthdate = :birthdate, 
+                        pers_deathdate = :deathdate, 
+                        pers_nat_id = :nat_id, 
+                        pers_photo = :photo,
+                        pers_updated_at = NOW()
                    WHERE pers_id = :id";
 
         $rqPrep = $this->_db->prepare($strRq);
@@ -227,53 +233,53 @@
      */
     public function findPersonWithFilters(?string $strSearch, string $strFilter, string $strSort): array {
 
-			$strRq = "SELECT pers_id, pers_firstname, pers_name, job_name AS pers_job
-						FROM persons 
-                        INNER JOIN participates ON participates.part_pers_id = persons.pers_id
-                        INNER JOIN jobs ON participates.part_job_id = jobs.job_id
-                        WHERE 1 = 1";
-                        
+        $strRq = "SELECT pers_id, pers_firstname, pers_name, job_name AS pers_job
+                    FROM persons 
+                    INNER JOIN participates ON participates.part_pers_id = persons.pers_id
+                    INNER JOIN jobs ON participates.part_job_id = jobs.job_id
+                    WHERE 1 = 1";
+                    
 
-			$params = [];
+        $params = [];
 
-			if (!empty($strSearch)) {
+        if (!empty($strSearch)) {
 
-				$strRq .= " AND CONCAT(pers_firstname, ' ', pers_name) LIKE :search";
+            $strRq .= " AND CONCAT(pers_firstname, ' ', pers_name) LIKE :search";
 
-				$params[':search'] = "%" . $strSearch . "%";
-			}			
+            $params[':search'] = "%" . $strSearch . "%";
+        }			
 
-			switch($strFilter) {
-				case 'actor':
-					$strRq .= " AND jobs.job_id = 3";
-					break;
-				case 'producer':
-					$strRq .= " AND jobs.job_id = 2";
-					break;
-				case 'realisator':
-					$strRq .= " AND jobs.job_id = 1";
-					break;				
-				default:
-					break;
-			}
-            $strRq .= " GROUP BY pers_id ";
+        switch($strFilter) {
+            case 'actor':
+                $strRq .= " AND jobs.job_id = 3";
+                break;
+            case 'producer':
+                $strRq .= " AND jobs.job_id = 2";
+                break;
+            case 'realisator':
+                $strRq .= " AND jobs.job_id = 1";
+                break;				
+            default:
+                break;
+        }
+        $strRq .= " GROUP BY pers_id ";
 
-            if ($strSort === 'desc') {
-                    $strRq .= " ORDER BY CONCAT(pers_firstname,' ' ,pers_name) DESC";
-                } else {
-                    $strRq .= " ORDER BY CONCAT(pers_firstname,' ' ,pers_name) ASC";
-            }
-       
+        if ($strSort === 'desc') {
+                $strRq .= " ORDER BY CONCAT(pers_firstname,' ' ,pers_name) DESC";
+            } else {
+                $strRq .= " ORDER BY CONCAT(pers_firstname,' ' ,pers_name) ASC";
+        }
+    
 
-			$prep = $this->_db->prepare($strRq);
+        $prep = $this->_db->prepare($strRq);
 
-			foreach($params as $key => $val) {
-				$prep->bindValue($key, $val, PDO::PARAM_STR);
-			}
+        foreach($params as $key => $val) {
+            $prep->bindValue($key, $val, PDO::PARAM_STR);
+        }
 
-			$prep->execute();
+        $prep->execute();
 
-			return $prep->fetchAll();
-		}
+        return $prep->fetchAll();
+    }
 
 }

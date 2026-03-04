@@ -1,10 +1,9 @@
 const antiSpoiler = document.querySelectorAll('#spoiler');
-
-antiSpoiler.forEach(spoiler => {
-  spoiler.addEventListener('click', () => {
-      spoiler.style.display = 'none';
-    });
-});
+  antiSpoiler.forEach(spoiler => {
+    spoiler.addEventListener('click', () => {
+        spoiler.style.display = 'none';
+      });
+  });
 
 
 

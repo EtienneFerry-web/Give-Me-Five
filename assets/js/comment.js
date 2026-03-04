@@ -1,3 +1,10 @@
+/**
+ * @brief Initializes the interactive star rating system.
+ * * Sets up click listeners on star icons to handle full and half-star ratings
+ * using the mouse position relative to the star's width. Includes a 
+ * debounce timer before calling the server-side insertion.
+ */
+
 function initStars() {
     const stars = document.querySelectorAll('.rating i');
     const inputNote = document.getElementById('note');
@@ -41,6 +48,13 @@ function initStars() {
     });
 }
 
+/**
+ * @brief Renders the visual state of stars based on a given value.
+ * @param {number|string} value - The rating value to display.
+ * * Iterates through star elements and assigns the correct Bootstrap icon
+ * class (full, half, or empty) to match the provided rating.
+ */
+
 function renderStars(value) {
     const stars = document.querySelectorAll('.rating i');
     const note = parseFloat(value);
@@ -60,6 +74,12 @@ function renderStars(value) {
     });
 }
 
+/**
+ * @brief Transforms a static comment container into an editable form.
+ * @param {number|string} reviewId - The unique ID of the review/comment.
+ * * Dynamically injects an HTML form into the comment container, pre-filling it
+ * with current data and re-initializing the star system for the new form.
+ */
 
 function enableEdit(reviewId) {
   const container = document.querySelector(`#comment-container-${reviewId}`);
@@ -67,8 +87,6 @@ function enableEdit(reviewId) {
   const currentText = container.querySelector('.comment-text').innerText;
   const currentNote = container.querySelector('.note-display').innerText;
 
-  console.log(movieId);
-    // On remplace le contenu par un formulaire
   container.innerHTML = `
       <p>Si votre commentaire est modifier les like réinisialiter !</p>
       <form method="post" class="py-3">

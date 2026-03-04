@@ -186,7 +186,7 @@
                                 SELECT 1 FROM reports
                                 WHERE rep_reporter_user_id = :user_id
                                 AND rep_reported_movie_id = movies.mov_id
-                                AND rep_delete_at IS NULL
+                                AND rep_deleted_at IS NULL
 
                             ) AS mov_reported,
 
@@ -307,7 +307,8 @@
                              mov_description = :description,
                              mov_release_date = :createDate,
                              mov_nat_id = :idNationality,
-                             mov_trailer_url = :trailer
+                             mov_trailer_url = :trailer,
+                             mov_updated_at = NOW()
 						 WHERE mov_id= :id";
 			// Prepared request
 			$rqPrep	= $this->_db->prepare($strRq);
@@ -328,7 +329,8 @@
 
                 $strRq2 = "UPDATE photos
                             SET pho_photo = :photo,
-                                pho_mov_id = :idMovie
+                                pho_mov_id = :idMovie,
+                                pho_updated_at = NOW()
                             WHERE pho_mov_id = :idMovie";
 
             $rqPrep2	= $this->_db->prepare($strRq2);

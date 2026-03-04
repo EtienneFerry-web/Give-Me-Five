@@ -19,7 +19,7 @@
             $strRq = "  SELECT rep_id ,rep_bio_user, rep_pseudo_user, rep_reported_user_id, rep_reason, user_photo AS 'rep_photo', user_ban_at AS 'rep_user_ban'
                         FROM reports
                         INNER JOIN users ON reports.rep_reported_user_id = users.user_id
-                        WHERE rep_reported_movie_id IS NULL AND rep_reported_com_id IS NULL AND rep_delete_at IS NULL
+                        WHERE rep_reported_movie_id IS NULL AND rep_reported_com_id IS NULL AND rep_deleted_at IS NULL
                         GROUP BY rep_reported_user_id";
 
             return $this->_db->query($strRq)->fetchAll();
@@ -34,7 +34,7 @@
             $strRq = "  SELECT rep_id , rep_reported_movie_id, rep_reason, mov_title AS 'rep_title'
                         FROM reports
                         INNER JOIN movies ON reports.rep_reported_movie_id = movies.mov_id
-                        WHERE rep_reported_user_id IS NULL AND rep_reported_com_id IS NULL AND rep_delete_at IS NULL
+                        WHERE rep_reported_user_id IS NULL AND rep_reported_com_id IS NULL AND rep_deleted_at IS NULL
                         GROUP BY rep_reported_movie_id";
 
             return $this->_db->query($strRq)->fetchAll();
@@ -50,7 +50,7 @@
                         FROM reports
                         INNER JOIN comments ON reports.rep_reported_com_id = comments.com_id
                         INNER JOIN users ON reports.rep_reported_user_id = users.user_id
-                        WHERE rep_reported_movie_id IS NULL AND rep_com_content IS NOT NULL AND rep_delete_at IS NULL
+                        WHERE rep_reported_movie_id IS NULL AND rep_com_content IS NOT NULL AND rep_deleted_at IS NULL
                         GROUP BY rep_reported_com_id";
 
             return $this->_db->query($strRq)->fetchAll();
@@ -58,7 +58,7 @@
         
         public function validateReport(int $intId): bool {
             $strRq = "  UPDATE reports
-                            SET rep_delete_at = NOW()
+                            SET rep_deleted_at = NOW()
                         WHERE rep_id = :id";
 
             $rqPrep = $this->_db->prepare($strRq);
@@ -93,7 +93,7 @@
 
         public function repOfConnectUser(int $intId): array {
 
-            $strRq = "  SELECT user_pseudo AS 'rep_pseudo', mov_title AS 'rep_title', rep_reason, rep_delete_at, rep_reported_user_id, rep_reported_movie_id
+            $strRq = "  SELECT user_pseudo AS 'rep_pseudo', mov_title AS 'rep_title', rep_reason, rep_deleted_at, rep_reported_user_id, rep_reported_movie_id
                         FROM reports
                         LEFT JOIN users ON reports.rep_reported_user_id = users.user_id
                         LEFT JOIN movies ON reports.rep_reported_movie_id = movies.mov_id

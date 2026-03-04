@@ -36,7 +36,7 @@
                             SELECT 1 FROM reports
                             WHERE rep_reported_com_id = comments.com_id
                             AND rep_reporter_user_id = :userId
-                            AND rep_delete_at IS NULL
+                            AND rep_deleted_at IS NULL
                             ) AS 'com_reported',
 
                             EXISTS(
@@ -51,7 +51,7 @@
                         INNER JOIN movies ON comments.com_movie_id = movies.mov_id
                         LEFT JOIN liked ON liked.lik_com_id = comments.com_id AND liked.lik_mov_id IS NULL
                         LEFT JOIN ratings ON ratings.rat_mov_id = movies.mov_id AND ratings.rat_user_id = users.user_id
-                        WHERE movies.mov_id = :id AND user_delete_at IS NULL AND (user_ban_at < NOW() OR user_ban_at IS NULL)
+                        WHERE movies.mov_id = :id AND user_deleted_at IS NULL AND (user_ban_at < NOW() OR user_ban_at IS NULL)
                         GROUP BY
                             comments.com_id,
                             comments.com_user_id,
@@ -111,7 +111,7 @@
                         INNER JOIN comments ON (users.user_id = comments.com_user_id AND movies.mov_id = comments.com_movie_id)
                         INNER JOIN photos ON movies.mov_id = photos.pho_mov_id AND pho_type = 'Affiche'
                         LEFT JOIN liked ON liked.lik_com_id = comments.com_id AND liked.lik_mov_id IS NULL
-                        WHERE users.user_id = :id AND user_delete_at IS NULL AND (user_ban_at < NOW() OR user_ban_at IS NULL)
+                        WHERE users.user_id = :id AND user_deleted_at IS NULL AND (user_ban_at < NOW() OR user_ban_at IS NULL)
 
                         GROUP BY
                             comments.com_id,
@@ -190,7 +190,7 @@
             
             $sql1 = "   UPDATE comments
                         SET com_comment = :comment,
-                        com_update_at = NOW()
+                        com_updated_at = NOW()
                         WHERE com_id = :id AND com_user_id = :userId";
 
             $rq1 = $this->_db->prepare($sql1);

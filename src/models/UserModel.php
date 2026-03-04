@@ -21,7 +21,7 @@
 			$strRq = "SELECT *
 						FROM users
 						WHERE user_id = :id
-						AND user_delete_at IS NULL";
+						AND user_deleted_at IS NULL";
 
 			$prep = $this->_db->prepare($strRq);
 			$prep->bindValue(':id', $id, PDO::PARAM_INT);
@@ -40,7 +40,7 @@
         public function findAllUsers():array{
 			$strRq	= "SELECT user_id, user_firstname, user_name, user_pseudo, user_email, user_funct_id
 						FROM users
-						WHERE user_delete_at IS NULL";
+						WHERE user_deleted_at IS NULL";
 
 			return $this->_db->query($strRq)->fetchAll();
 		}
@@ -60,7 +60,7 @@
 
 			$strRq = "SELECT user_id, user_firstname, user_name, user_pseudo, user_email, user_funct_id
 						FROM users
-						WHERE user_delete_at IS NULL";
+						WHERE user_deleted_at IS NULL";
 
 			$params = [];
 			if (!empty($strSearch)) {
@@ -191,7 +191,7 @@
 			$strRq 		= "SELECT user_id, user_email, user_name, user_firstname
 							FROM users
 							WHERE user_email = :email
-								AND user_delete_at IS NULL";
+								AND user_deleted_at IS NULL";
 			$rqPrepare 	= $this->_db->prepare($strRq);
 			$rqPrepare->bindValue(":email", $strMail, PDO::PARAM_STR);
 			$rqPrepare->execute();
@@ -212,7 +212,7 @@
 							FROM users
 							WHERE user_reset_token = :token
 								AND user_reset_expires > NOW()
-								AND user_delete_at IS NULL";
+								AND user_deleted_at IS NULL";
 			$rqPrepare 	= $this->_db->prepare($strRq);
 			$rqPrepare->bindValue(":token", $strToken, PDO::PARAM_STR);
 			$rqPrepare->execute();
@@ -260,21 +260,21 @@
                             ) AS 'user_reported'
                         FROM users
                         INNER JOIN functions ON users.user_funct_id = functions.funct_id
-                        WHERE user_id = $idUser AND user_delete_at IS NULL AND (user_ban_at IS NULL OR user_ban_at < NOW())";
+                        WHERE user_id = $idUser AND user_deleted_at IS NULL AND (user_ban_at IS NULL OR user_ban_at < NOW())";
 
             return $this->_db->query($strRq)->fetch();
         }
 
 		/**
          * @brief Performs a soft delete on a user account.
-         * @details Updates the 'user_delete_at' column with the current timestamp instead of removing the row.
+         * @details Updates the 'user_deleted_at' column with the current timestamp instead of removing the row.
          * @author Etienne
          * @param int $intId The unique ID of the user to deactivate.
          * @return bool Success status of the update.
          */
 
         public function deleteUser(int $intId){
-			$strRq = "UPDATE users SET user_delete_at = NOW()
+			$strRq = "UPDATE users SET user_deleted_at = NOW()
 					  WHERE user_id = :id";
 
 			$rqPrep = $this->_db->prepare($strRq);
@@ -319,7 +319,7 @@
 							user_photo			= :photo,
 							user_email			= :email,
 							user_bio			= :bio,
-							user_update_at		= NOW()";
+							user_updated_at		= NOW()";
 
 					if(!empty($objUser->getPwd())){
 
@@ -362,7 +362,7 @@
 							user_photo			= :photo,
 							user_email			= :email,
 							user_bio			= :bio,
-							user_update_at		= NOW()
+							user_updated_at		= NOW()
 						WHERE user_id 			= :id";
 
 			$rqPrep	= $this->_db->prepare($strRq);
@@ -437,7 +437,7 @@
 		public function updateGrade(int $intId, int $intFunctId):bool {
 			$strRq = "UPDATE users
 						SET user_funct_id 	= :functId,
-							user_update_at	= NOW()
+							user_updated_at	= NOW()
 						WHERE user_id 		= :id";
 
 			$rqPrep = $this->_db->prepare($strRq);
