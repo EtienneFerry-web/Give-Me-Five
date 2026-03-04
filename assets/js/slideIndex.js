@@ -1,3 +1,15 @@
+/**
+ * @file slideIndex.js
+ * @description handles the initialization of the Splide.js carousel and 
+ * the dynamic generation of star ratings based on data attributes.
+ */
+
+/**
+ * @function initSplide
+ * @description Initializes the Splide slider with continuous auto-scroll 
+ * and responsive breakpoints for different screen sizes.
+ */
+
 document.addEventListener('DOMContentLoaded', function () {
   new Splide('.splide', {
     type: 'loop',
@@ -22,6 +34,12 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 
+/**
+ * @function generateStars
+ * @description Selects all elements with the class .movieNote, reads the 
+ * @param {number} data-note - The rating value to convert into stars.
+ * @description Injects Bootstrap Icon (bi) classes into the stars container.
+ */
 
 document.querySelectorAll(".movieNote").forEach(movie => {
     const note = parseFloat(movie.dataset.note);

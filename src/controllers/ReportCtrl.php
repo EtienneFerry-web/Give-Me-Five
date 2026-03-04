@@ -36,7 +36,7 @@
 			if(isset($_POST['addRemoveSpoiler'])){
 
 			    if($objCommentModel->addSpoiler($_POST['addRemoveSpoiler'])){
-					$_SESSION['success'] = "Spoiler Update !";
+					$_SESSION['success'] = "Spoiler à était mis a jours !";
                     $this->_selfRedirect();
 				}
 			}

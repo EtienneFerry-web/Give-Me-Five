@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1:3306
--- Généré le : mer. 04 mars 2026 à 09:58
+-- Généré le : mer. 04 mars 2026 à 12:39
 -- Version du serveur : 8.4.7
 -- Version de PHP : 8.3.28
 
@@ -178,7 +178,7 @@ CREATE TABLE IF NOT EXISTS `comments` (
   UNIQUE KEY `id_user_movie` (`com_user_id`,`com_movie_id`),
   KEY `fk_com_user_id` (`com_user_id`),
   KEY `fk_com_movie_id` (`com_movie_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=109 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=110 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Déchargement des données de la table `comments`
@@ -202,7 +202,8 @@ INSERT INTO `comments` (`com_id`, `com_comment`, `com_datetime`, `com_user_id`, 
 (29, 'L\'homme mystérieux me donne des frissons.', '2024-07-22 13:50:00', 10, 20, 0, NULL),
 (30, 'Une boucle temporelle fascinante à analyser.', '2024-03-22 16:50:00', 4, 20, 0, NULL),
 (105, '😁😁😁😁😁😁😁😁😁😁😁😁', '2026-03-03 20:29:58', 17, 32, 0, NULL),
-(108, 'test', '2026-03-04 09:31:04', 23, 25, 0, '2026-03-04 09:33:38');
+(108, 'test', '2026-03-04 09:31:04', 23, 25, 0, '2026-03-04 09:33:38'),
+(109, 'dzqdqzd', '2026-03-04 11:38:27', 23, 21, 0, NULL);
 
 --
 -- Déclencheurs `comments`
@@ -280,7 +281,7 @@ CREATE TABLE IF NOT EXISTS `history_comments` (
   `hist_newvalue` text COLLATE utf8mb4_unicode_ci,
   `hist_userid` int NOT NULL,
   PRIMARY KEY (`hist_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=57 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=58 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Déchargement des données de la table `history_comments`
@@ -342,7 +343,8 @@ INSERT INTO `history_comments` (`hist_id`, `hist_table`, `hist_event`, `hist_ele
 (53, 'comments', 'INSERT', 107, '2026-03-04 09:25:37', NULL, NULL, NULL, 23),
 (54, 'comments', 'DELETE', 107, '2026-03-04 09:28:34', 'com_comment', '<h1>test</h1>', NULL, 23),
 (55, 'comments', 'INSERT', 108, '2026-03-04 09:31:04', NULL, NULL, NULL, 23),
-(56, 'comments', 'UPDATE', 108, '2026-03-04 09:33:38', 'com_comment', ' test ', 'test', 23);
+(56, 'comments', 'UPDATE', 108, '2026-03-04 09:33:38', 'com_comment', ' test ', 'test', 23),
+(57, 'comments', 'INSERT', 109, '2026-03-04 11:38:27', NULL, NULL, NULL, 23);
 
 -- --------------------------------------------------------
 
@@ -499,14 +501,14 @@ INSERT INTO `jobs` (`job_id`, `job_name`) VALUES
 
 DROP TABLE IF EXISTS `liked`;
 CREATE TABLE IF NOT EXISTS `liked` (
-  `lik_user_id` int NOT NULL,
-  `lik_mov_id` int DEFAULT NULL,
-  `lik_com_id` int DEFAULT NULL,
+  `lik_user_id` int UNSIGNED NOT NULL,
+  `lik_mov_id` int UNSIGNED DEFAULT NULL,
+  `lik_com_id` int UNSIGNED DEFAULT NULL,
   `lik_created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   UNIQUE KEY `uk_like_movie` (`lik_user_id`,`lik_mov_id`),
   UNIQUE KEY `uk_like_comment` (`lik_user_id`,`lik_com_id`),
-  KEY `lik_mov_id` (`lik_mov_id`),
-  KEY `lik_com_id` (`lik_com_id`)
+  KEY `FK_com_like` (`lik_com_id`),
+  KEY `FK_mov_like` (`lik_mov_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -534,10 +536,6 @@ INSERT INTO `liked` (`lik_user_id`, `lik_mov_id`, `lik_com_id`, `lik_created_at`
 (6, 16, NULL, '2026-02-15 19:50:38'),
 (8, 16, NULL, '2026-02-15 19:50:38'),
 (10, 16, NULL, '2026-02-15 19:50:38'),
-(1, 17, NULL, '2026-02-15 19:50:38'),
-(2, 17, NULL, '2026-02-15 19:50:38'),
-(5, 17, NULL, '2026-02-15 19:50:38'),
-(8, 17, NULL, '2026-02-15 19:50:38'),
 (3, 18, NULL, '2026-02-15 19:50:38'),
 (4, 18, NULL, '2026-02-15 19:50:38'),
 (9, 18, NULL, '2026-02-15 19:50:38'),
@@ -557,16 +555,10 @@ INSERT INTO `liked` (`lik_user_id`, `lik_mov_id`, `lik_com_id`, `lik_created_at`
 (7, NULL, 16, '2026-02-15 19:50:38'),
 (8, NULL, 16, '2026-02-15 19:50:38'),
 (9, NULL, 16, '2026-02-15 19:50:38'),
-(10, NULL, 22, '2026-02-15 19:50:38'),
-(1, NULL, 22, '2026-02-15 19:50:38'),
-(2, NULL, 22, '2026-02-15 19:50:38'),
 (4, NULL, 28, '2026-02-15 19:50:38'),
 (5, NULL, 28, '2026-02-15 19:50:38'),
 (6, NULL, 28, '2026-02-15 19:50:38'),
-(17, NULL, 90, '2026-02-20 20:51:56'),
-(17, NULL, 91, '2026-02-20 21:10:10'),
 (17, 14, NULL, '2026-02-22 14:41:07'),
-(17, 29, NULL, '2026-02-28 20:33:34'),
 (17, 20, NULL, '2026-03-02 20:53:23'),
 (17, NULL, 28, '2026-03-02 20:54:43'),
 (17, NULL, 105, '2026-03-03 19:58:59'),
@@ -602,7 +594,7 @@ CREATE TABLE IF NOT EXISTS `logs_users` (
   `log_agent` text,
   `log_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`log_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=95 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=105 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Déchargement des données de la table `logs_users`
@@ -702,7 +694,17 @@ INSERT INTO `logs_users` (`log_id`, `log_user_id`, `log_event`, `log_ip`, `log_a
 (91, 23, 'LOGIN', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-04 07:46:37'),
 (92, 23, 'LOGOUT', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-04 09:26:08'),
 (93, 17, 'LOGIN', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-04 09:26:23'),
-(94, 17, 'LOGIN', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-04 09:29:49');
+(94, 17, 'LOGIN', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-04 09:29:49'),
+(95, 17, 'LOGOUT', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-04 10:22:49'),
+(96, 23, 'LOGIN', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-04 10:38:19'),
+(97, 23, 'LOGOUT', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-04 10:55:15'),
+(98, 17, 'LOGIN', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-04 10:55:21'),
+(99, 17, 'LOGOUT', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-04 11:57:12'),
+(100, 23, 'LOGIN', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-04 12:11:15'),
+(101, 23, 'LOGOUT', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-04 12:11:25'),
+(102, 23, 'LOGIN', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-04 12:14:50'),
+(103, 23, 'LOGOUT', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-04 12:15:53'),
+(104, 23, 'LOGIN', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-04 12:15:56');
 
 -- --------------------------------------------------------
 
@@ -719,7 +721,7 @@ CREATE TABLE IF NOT EXISTS `movies` (
   `mov_description` text COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Description',
   `mov_release_date` date NOT NULL COMMENT 'Release date',
   `mov_nat_id` int UNSIGNED DEFAULT NULL,
-  `mov_trailer_url` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `mov_trailer_url` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `mov_published_at` datetime DEFAULT NULL,
   `mov_updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`mov_id`),
@@ -1022,20 +1024,14 @@ CREATE TABLE IF NOT EXISTS `ratings` (
 --
 
 INSERT INTO `ratings` (`rat_user_id`, `rat_mov_id`, `rat_score`) VALUES
-(1, 11, 4.3),
 (1, 15, 4.3),
 (1, 16, 5.0),
 (1, 22, 4.5),
-(1, 23, 4.0),
-(2, 12, 2.5),
 (2, 13, 4.0),
 (2, 14, 4.3),
 (2, 16, 4.3),
-(2, 17, 4.3),
 (2, 20, 4.3),
 (2, 21, 2.0),
-(2, 23, 3.0),
-(3, 11, 3.5),
 (3, 13, 5.0),
 (3, 18, 4.0),
 (4, 13, 4.3),
@@ -1047,23 +1043,17 @@ INSERT INTO `ratings` (`rat_user_id`, `rat_mov_id`, `rat_score`) VALUES
 (5, 14, 5.0),
 (5, 15, 3.5),
 (5, 16, 4.5),
-(5, 17, 1.5),
 (5, 19, 3.0),
 (5, 20, 4.5),
 (5, 21, 2.0),
 (5, 22, 5.0),
-(5, 23, 3.5),
 (5, 24, 4.0),
 (5, 25, 3.0),
-(6, 11, 4.0),
 (6, 16, 3.0),
 (6, 25, 3.0),
-(7, 12, 4.5),
 (7, 13, 2.0),
 (7, 19, 4.3),
 (7, 22, 3.0),
-(8, 12, 4.3),
-(8, 17, 3.5),
 (8, 18, 4.3),
 (8, 19, 5.0),
 (9, 14, 5.0),
@@ -1077,20 +1067,11 @@ INSERT INTO `ratings` (`rat_user_id`, `rat_mov_id`, `rat_score`) VALUES
 (10, 20, 4.0),
 (10, 21, 3.0),
 (10, 22, 4.5),
-(10, 23, 3.5),
 (10, 24, 2.0),
 (10, 25, 4.5),
-(15, 11, 3.0),
-(15, 21, 4.5),
-(15, 23, 1.0),
-(15, 24, 4.0),
-(15, 25, 5.0),
-(16, 24, 0.5),
 (17, 14, 2.5),
 (17, 15, 4.0),
-(17, 17, 4.5),
 (17, 21, 5.0),
-(17, 23, 3.0),
 (17, 25, 4.5),
 (17, 32, 5.0),
 (23, 18, 5.0),
@@ -1182,7 +1163,7 @@ INSERT INTO `users` (`user_id`, `user_name`, `user_firstname`, `user_pseudo`, `u
 (9, 'Moreau', 'Nathan', 'nate_m', 'nathan.moreau@exemple.com', '1993-04-10', '2024-03-25 09:45:00', 1, NULL, NULL, '', NULL, NULL, NULL, 'e édqdzq', NULL, NULL, NULL),
 (10, 'Simon', 'Sarah', 's_simon', 'sarah.simon@exemple.com', '1982-08-05', '2024-04-01 12:00:00', 1, NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (17, 'MARCO', 'Marco', 'Testzzzzzzzz', 'slendsher48@gmail.com', '2006-03-22', '2026-02-05 15:50:29', 3, 'zdqdqdqzddqzdqdzqdqdzqzd zdzqdzqd', '69a59fbcc84a4.png', '$2y$12$zRjrT2Pcs1Lfn6jhd0Z6guipp3vIph5ZdgGF4dybhQp35RiTst6HO', NULL, '2026-03-02 15:33:32', NULL, NULL, '4f8c7a804b1127776714a58a808d9de6f5b7f397252f6feda9b3292b063db3abbd2e9a2bf4bbf3697e4367e25763274a2fb422759d2c71fa23c7f4efd72ed1d5', '2026-02-28 15:41:45', NULL),
-(23, 'SCHMITT', 'MARCO', 'Truc', 'marco06.marco06@gmail.com', '2222-02-22', '2026-02-08 15:12:38', 2, '', '69a46168ac5d7.png', '$2y$10$ZWiLqzPoxwvP5KSCRW.Ac.VDgw41CLBalyfmtQ3jolT062c78.M2W', NULL, '2026-03-01 16:55:20', NULL, NULL, NULL, NULL, NULL),
+(23, 'SCHMITT', 'MARCO', 'Truc', 'marco06.marco06@gmail.com', '2222-02-22', '2026-02-08 15:12:38', 2, '', '69a46168ac5d7.png', '$2y$10$ZWiLqzPoxwvP5KSCRW.Ac.VDgw41CLBalyfmtQ3jolT062c78.M2W', NULL, '2026-03-01 16:55:20', NULL, NULL, 'a25e81964f79dd3714daad73dfde4c77268633209ff2f78408b6a2250a4a5a2ed6d53243ece3862b68a3a48d5bc07094f09f4aa2ecd104c60f5d6028d0dbdc02', '2026-03-04 12:01:47', NULL),
 (24, 'SCHMITT', 'MARCOOOOOOO', 'marcoooo', 'test@gmail.com', '2222-02-22', '2026-02-09 08:55:06', 2, '', '698b57ac34581.png', '$2y$10$QtZit0YtsMgqojOEnlsi6eQcph6yTiI.RuxXqRNI29ZlTXpMPoc6a', NULL, '2026-02-20 22:11:38', NULL, 'parceque', NULL, NULL, NULL),
 (25, 'dqzzdq', 'dzqdzq', 'user', 'user@gmail.com', '2222-02-22', '2026-02-13 11:12:08', 1, NULL, NULL, '$2y$12$VMEuNAGgcYnmr13mM7Sy3.naxE/pgFRbal1ujYj6hsHKF.nEUAz8G', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (26, 'dzqdzq', 'dzqdqz', 'Testdzqdzq', 'zaezaedzqd@gmail.com', '2222-02-22', '2026-02-20 08:33:57', 1, NULL, NULL, '$2y$10$D0EWAzxywtwK7iv6wdBn0.Q62/fr4fUtHMhMhtZpOG30JCLPmJEU2', NULL, NULL, '2026-03-17 00:00:00', 'parce que', NULL, NULL, NULL),
@@ -1285,6 +1266,14 @@ ALTER TABLE `comments`
   ADD CONSTRAINT `fk_com_user_id` FOREIGN KEY (`com_user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
 
 --
+-- Contraintes pour la table `liked`
+--
+ALTER TABLE `liked`
+  ADD CONSTRAINT `FK_com_like` FOREIGN KEY (`lik_com_id`) REFERENCES `comments` (`com_id`),
+  ADD CONSTRAINT `FK_mov_like` FOREIGN KEY (`lik_mov_id`) REFERENCES `movies` (`mov_id`),
+  ADD CONSTRAINT `FK_user_like` FOREIGN KEY (`lik_user_id`) REFERENCES `users` (`user_id`);
+
+--
 -- Contraintes pour la table `movies`
 --
 ALTER TABLE `movies`
@@ -1309,6 +1298,13 @@ ALTER TABLE `persons`
 --
 ALTER TABLE `photos`
   ADD CONSTRAINT `fk_pho_mov_id` FOREIGN KEY (`pho_mov_id`) REFERENCES `movies` (`mov_id`) ON DELETE CASCADE;
+
+--
+-- Contraintes pour la table `ratings`
+--
+ALTER TABLE `ratings`
+  ADD CONSTRAINT `FK_rat_mov` FOREIGN KEY (`rat_mov_id`) REFERENCES `movies` (`mov_id`),
+  ADD CONSTRAINT `FK_rat_user` FOREIGN KEY (`rat_user_id`) REFERENCES `users` (`user_id`);
 
 --
 -- Contraintes pour la table `reports`

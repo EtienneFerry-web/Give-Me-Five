@@ -2,27 +2,31 @@
 {block name="title" prepend}403{/block}
 {block name="description"}Erreur 403 page intropuvable{/block}
 
-{block name="css_variation"}
-    <link rel="stylesheet" href="{$smarty.env.BASE_URL}assets/css/403.css">
-{/block}
-
 {block name="content"}
-<section class="container text-center py-5">
-    <h1>403 - Accées Refusé</h1>
-    <p>Flèche du haut pour sauter et Flèche du bas pour t'accroupir bonne chance !</p>
+<div class="container-fluid d-flex align-items-center justify-content-center bg-white" style="min-height: 75vh;">
+    <div class="text-center w-100">
+        
+        <h1 class="display-1 fw-bolder mb-0 text-dark" style="font-size: clamp(5rem, 20vw, 15rem); line-height: 1;">
+            403
+        </h1>
+        
+        <p class="h4 text-uppercase fw-light mb-5 text-dark" style="letter-spacing: 0.5rem;">
+            Accès Interdit
+        </p>
 
-    <div id="game-container">
-        <div id="player">403</div>
+        <div class="d-flex flex-wrap justify-content-center gap-3">
+            {if !isset($smarty.session.user)}
+                <a href="{$smarty.env.BASE_URL}user/login" class="btn btn-outline-dark btn-lg rounded-0 px-5 fw-bold">
+                    Se connecter
+                </a>
+            {/if}
+            <a href="{$smarty.env.BASE_URL}page/contact" class="btn btn-outline-dark btn-lg rounded-0 px-5 fw-bold">
+                Contactez-nous
+            </a>
+        </div>
+        
     </div>
-
-    <div>Score: <span id="score">0</span></div>
-    <div class="col-12 text-center">
-
-        <button class="btn btn-outline-dark px-5 text-uppercase my-5" onclick="createObstacle()">Start</button>
-    </div>
-</section>
+</div>
 {/block}
 
-{block name="js"}
-    <script src="{$smarty.env.BASE_URL}assets/js/403.js"> </script>
-{/block}
+

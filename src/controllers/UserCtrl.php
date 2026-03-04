@@ -189,37 +189,9 @@
             $objUser->hydrate($_POST);
 
             $arrError = [];
-            var_dump($_SESSION);
             if (count($_POST) > 0) {
                 
-                $birthdate = $objUser->getBirthdate();
-                var_dump($birthdate);
-
-                if ($objUser->getName() == ""){
-                    $arrError['name'] = "Le nom est obligatoire";
-                }
-                if ($objUser->getFirstname() == ""){
-                    $arrError['firstname'] = "Le prénom est obligatoire";
-                }
-                if ($objUser->getPseudo() == ""){
-                    $arrError['pseudo'] = "Le pseudo est obligatoire";
-                }
-                if ($birthdate == ""){
-                    $arrError['birthdate'] = "La date de naissance est obligatoire.";
-                } else {
-
-                    $limitDate = date("Y-m-d", strtotime("-8 years"));
-                    
-                    if ($objUser->getBirthdate() > $limitDate) {
-                        $arrError['birthdate'] = "Vous devez avoir plus de 8 ans.";
-                    }
-
-                }
-                if ($objUser->getEmail() == ""){
-                    $arrError['email'] = "Le mail est obligatoire";
-                }else if (!filter_var($objUser->getEmail(), FILTER_VALIDATE_EMAIL)){
-                    $arrError['email'] = "Le format du mail n'est pas correct";
-                }
+                $arrError	= $this->verifInfos($objUser);
                 //use verifypwd for regex
                 $pwdErrors = $this->_verifPwd($objUser, $strPwdConfirm);
                 $arrError = array_merge($arrError, $pwdErrors);
@@ -273,6 +245,8 @@
         private function verifInfos(object $objUser):array {
             $arrError =[];
 
+            $birthdate = $objUser->getBirthdate();
+
             if($objUser->getName()==""){
                 $arrError["name"] = "Le nom est obligatoire.";
             }
@@ -281,6 +255,26 @@
             }
             if($objUser->getPseudo()==""){
                 $arrError["pseudo"] = "Le pseudo est obligatoire.";
+            }
+            if(strlen($objUser->getPseudo()) > 50){
+                $arrError["pseudo"] = "Le pseudo est obligatoire.";
+            }
+            if(strlen($objUser->getFirstname()) > 50){
+                $arrError["pseudo"] = "Le pseudo est obligatoire.";
+            }
+            if(strlen($objUser->getName()) > 50){
+                $arrError["pseudo"] = "Le pseudo est obligatoire.";
+            }
+            if ($birthdate == ""){
+                    $arrError['birthdate'] = "La date de naissance est obligatoire.";
+            } else {
+
+                $limitDate = date("Y-m-d", strtotime("-8 years"));
+                
+                if ($objUser->getBirthdate() > $limitDate) {
+                    $arrError['birthdate'] = "Vous devez avoir plus de 8 ans.";
+                }
+
             }
             if($objUser->getEmail()==""){
                 $arrError["email"] = "Le pseudo est obligatoire.";
@@ -352,31 +346,9 @@
                 $password = $objUser->getPwd();
                 $strPwdConfirm = $objUser->getPwdConfirm();
 
-                if ($password != "") {
-
-                    if(strlen($password) < 16) {
-                        $arrError['pwd'] = "Le mot de passe doit au moins avoir 16 caractères";
-                    }
-
-                    if (!preg_match('/[A-Z]/', $password)) {
-                        $arrError['pwd'] = "Il manque une majuscule";
-                    }
-
-                    if (!preg_match('/[a-z]/', $password)) {
-                        $arrError['pwd'] = "Il manque une minuscule";
-                    }
-
-                    if (!preg_match('/[0-9]/', $password)) {
-                        $arrError['pwd'] = "Il manque au moins un chiffre";
-                    }
-
-                    if (!preg_match('/[#?!@$%^&*-]/', $password)) {
-                        $arrError['pwd'] = "Il manque un caractère spécial (#?!@$%^&*-)";
-                    }
-
-                    if ($password != $strPwdConfirm){
-                        $arrError['pwd_confirm'] = "Le mot de passe et sa confirmation ne sont pas identiques";
-                    }
+                if (!empty($objUser->getPwd())) {
+                    $pwdErrors = $this->_verifPwd($objUser, $strPwdConfirm);
+                    $arrError = array_merge($arrError, $pwdErrors);
                 }
 
                 if(count($arrError) == 0){
@@ -952,7 +924,6 @@
          */
 	
 		public function recoverPwd(){
-            var_dump($_POST);
             $strToken = $_GET['token'] ?? '';
             $arrError = [];
             if(empty($strToken)){

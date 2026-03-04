@@ -550,29 +550,32 @@
 				$objMovie->hydrate($_POST);
 
 				if (empty($objMovie->getTitle())) {
-					$arrError['title'] = "Le titre est obligatoire";
+					$arrError['title'] = "Le titre est obligatoire.";
+				}
+				if (strlen($objMovie->getTitle()) >  100) {
+					$arrError['title'] = "Le titre ne doit pas dépasser 100 caractères.";
+				}
+				if (strlen($objMovie->getOriginalTitle()) > 100) {
+					$arrError['original_title'] = "Le titre original ne doit pas dépasser 100 caractères.";
 				}
 				if ($objMovie->getCategoriesId() == 0) {
-					$arrError['categoriesId'] = "Le genre est obligatoire";
+					$arrError['categoriesId'] = "Le genre est obligatoire.";
 				}
 				if ($objMovie->getCountryId() == 0) {
-					$arrError['countryId'] = "Le pays d'origine est obligatoire";
+					$arrError['countryId'] = "Le pays d'origine est obligatoire.";
 				}
 				if ($objMovie->getRelease_date() == '') {
-					$arrError['release_date'] = "La durée est obligatoire";
+					$arrError['release_date'] = "La date de sortie est obligatoire.";
 				}
 				if (empty($objMovie->getLength())) {
-					$arrError['length'] = "La durée est obligatoire";
+					$arrError['length'] = "La durée est obligatoire.";
 				}
 				if (empty($objMovie->getDescription())) {
-					$arrError['description'] = "Le synopsis est obligatoire";
+					$arrError['description'] = "Le synopsis est obligatoire.";
 				}
 				if (empty($objMovie->getTrailer())) {
-					$arrError['trailer_url'] = "La durée est obligatoire";
+					$arrError['trailer_url'] = "Le lien de la bande-annonce est obligatoire.";
 				}
-								
-				
-				
 
 				$arrTypeAllowed	= array('image/jpeg', 'image/png', 'image/webp');
 				if ($_FILES['photo']['error'] != 4){

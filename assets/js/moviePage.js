@@ -1,3 +1,15 @@
+/**
+ * @file moviePage.js
+ * @description Manages anti-spoiler overlays, movie page ratings, and secondary Splide sliders.
+ */
+
+/**
+ * @function initAntiSpoiler
+ * @description Hides the spoiler overlay when a user clicks on it to reveal content.
+ * @param {string} #spoiler - The ID of the spoiler element. 
+ * Note: If using multiple spoilers, consider using a class (.spoiler) instead of an ID.
+ */
+
 const antiSpoiler = document.querySelectorAll('#spoiler');
   antiSpoiler.forEach(spoiler => {
     spoiler.addEventListener('click', () => {
@@ -5,7 +17,11 @@ const antiSpoiler = document.querySelectorAll('#spoiler');
       });
   });
 
-
+/**
+ * @function generatePageMovieStars
+ * @description Converts numerical data-note values into Bootstrap star icons for the movie page.
+ * @param {number} data-note - The rating value (e.g., 3.5) from the HTML element.
+ */
 
 document.querySelectorAll(".pageMovieNote").forEach(movie => {
     const note = parseFloat(movie.dataset.note);
@@ -28,6 +44,11 @@ document.querySelectorAll(".pageMovieNote").forEach(movie => {
     }
 });
 
+/**
+ * @function initSecondarySliders
+ * @description Initializes all secondary Splide instances with 'slide' mode and free drag.
+ * @requires Splide.js
+ */
 
 window.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.splide').forEach(slider => {

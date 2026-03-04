@@ -127,11 +127,18 @@
             $arrError = [];
             if (count($_POST) > 0) {
                 $objPerson->hydrate($_POST);
+                
                 if ($objPerson->getName() == ""){
                     $arrError['name'] = "Le nom est obligatoire";
                 }
+                if (strlen($objPerson->getName()) > 50){
+                    $arrError['name'] = "Le nom ne doit pas dépasser 255 caractères";
+                }
                 if ($objPerson->getFirstname() == ""){
                     $arrError['firstname'] = "Le prénom est obligatoire";
+                }
+                if (strlen($objPerson->getFirstname()) > 50){
+                    $arrError['firstname'] = "Le prénom ne doit pas dépasser 50 caractères";
                 }
                 if ($objPerson->getBirthdate() == ""){
                     $arrError['birthdate'] = "La date de naissance est obligatoire";
@@ -142,6 +149,10 @@
                 if ($objPerson->getBio() == ""){
                     $arrError['bio'] = "La biographie est obligatoire";
                 }
+                if (strlen($objPerson->getBio()) > 255){
+                    $arrError['bio'] = "La biographie ne doit pas dépasser 255 caractères";
+                }
+
 
                 $arrTypeAllowed	= array('image/jpeg', 'image/png', 'image/webp');
 				if ($_FILES['photo']['error'] != 4){

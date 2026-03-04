@@ -3,7 +3,7 @@
 {block name="description"}Connectez-vous pour une expérience personnalisée{/block}
 
 {block name="content"}
-    <section id="login" class="container py-5 my-auto ">
+    <section id="login" class="container py-5 my-auto" style="min-height: 75vh;" >
         <!-- include messages  -->
         <h1 class="text-center">Connexion</h1>
         <p class="mx-auto text-center py-2">Si vous n'avez pas de compte vous pouvez en créer un sur la page d'<a
