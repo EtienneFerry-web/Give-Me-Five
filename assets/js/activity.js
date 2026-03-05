@@ -16,13 +16,13 @@ function pingServer() {
 
     if (now - lastUpdate > bufferTime) {
 
-        fetch(`http://localhost/GiveMeFive/user/userActivity`)
+        fetch(`${url}user/userActivity`)
             .then(response => response.text())
             .then(data => {
                 console.log(data);
                 if (data === "logout") {
                     alert("Votre session a expiré pour inactivité. Vous allez être redirigé.");
-                    window.location.href = "http://localhost/GiveMeFive/user/logout";
+                    window.location.href = `${url}user/logout`;
                 } else {
                     console.log("Session prolongée");
                 }

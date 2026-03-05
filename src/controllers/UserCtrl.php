@@ -83,7 +83,7 @@
                 if (count($_POST) > 0) {
 
                     if ($strEmail == ""){
-                        $arrError['email'] = "Le mail est obligatoire";
+                        $arrError['email'] = "L’adresse e-mail est obligatoire.";
                     }
                     if ($strPwd == ""){
                         $arrError['pwd'] = "Le mot de passe est obligatoire";
@@ -94,22 +94,30 @@
                         if ($arrResult === false){
                                 $arrError[] = "Mail ou mot de passe invalide";
                             }else{
+                                $now = new DateTime();
+                                $banDate = (!empty($arrResult['user_ban_at']) && $arrResult['user_ban_at'] !== '0000-00-00 00:00:00') 
+                                        ? new DateTime($arrResult['user_ban_at']) 
+                                        : null;
 
-                                $objUserModel->clearLoginAttempts($ipAddress);
+                                if (!$banDate || $now > $banDate) {
+                                    
+                                    $_SESSION['user']           = $arrResult;
+                                    $_SESSION['success']        = "Bienvenue, vous êtes bien connecté";
+                                    $_SESSION['last_activity']  = new DateTime('+30 minutes');
 
-                                $_SESSION['user']       = $arrResult;
-                                $_SESSION['success']    = "Bienvenue, vous êtes bien connecté";
-                                $_SESSION['last_activity']    = new DateTime('+30 minutes');
-
-                                $arrData = array (
-                                    'userId'  => $_SESSION['user']['user_id'],
-                                    'event'   => 'LOGIN',
-                                    'ip'      => $_SERVER['REMOTE_ADDR'],
-                                    'agent'   => $_SERVER['HTTP_USER_AGENT'] ?? 'Inconnu'
-                                );
-
-                                $objUserModel->addLogs($arrData);
-                                $this->_redirect();
+                                    $arrData = array (
+                                        'userId' => $arrResult['user_id'],
+                                        'event'  => 'LOGIN',
+                                        'ip'     => $_SERVER['REMOTE_ADDR'],
+                                        'agent'  => $_SERVER['HTTP_USER_AGENT'] ?? 'Inconnu'
+                                    );
+                                    $objUserModel->addLogs($arrData);
+                                    $objUserModel->clearLoginAttempts($ipAddress);
+                                    $this->_redirect();
+                                } else {
+                                    $arrError[] = "Vous êtes banni jusqu'au " . $banDate->format('d/m/Y H:i') . ". Raison : " . $arrResult['user_reason_ban'];
+                                }
+                                
                         }
                     }
                 }
@@ -146,7 +154,7 @@
 
             $objUserModel->addLogs($arrData);
 
-            if($_SESSION['last_activity'] == 0){
+            if(is_numeric($_SESSION['last_activity']) && $_SESSION['last_activity'] == 0){
                 $_SESSION['success']  = "Vous avez êtes déconnecté pour inactivité !";
                 unset($_SESSION['user']);
                 unset($_SESSION['last_activity']);
@@ -201,20 +209,27 @@
                     $objUserModel   = new UserModel;
                     $boolInsert     = $objUserModel->insert($objUser);
 
-                    if($boolInsert != true && $boolInsert['user_email'] == $objUser->getEmail()){
-                        $arrError[] = "Adresse mail ou Mots de passe Invalide !";
+                    if (is_array($boolInsert)) {
+                        if ($boolInsert['user_email'] == $objUser->getEmail()) {
+                            $arrError[] = "Cette adresse email est déjà utilisée !";
+                        }
+                        
+                        if ($boolInsert['user_pseudo'] == $objUser->getPseudo()) {
+                            $arrError[] = "Ce pseudonyme est déjà utilisé !";
+                        }
                     }
-                    if($boolInsert != true  && $boolInsert['user_pseudo'] == $objUser->getPseudo()){
-                       $arrError[] = "Ce pseudonyme est déja utilisé !";
+                    
+                    elseif ($boolInsert === false) {
+                        $arrError[] = "Erreur technique lors de la création du compte.";
                     }
-
-                    if ($boolInsert != false && count($arrError) == 0){
+                    
+                    if (count($arrError) == 0){
 
                             $_SESSION['success']    = "Le compte compte a bien été crée";
                             $this->_redirect("user/login");
 
                     }else{
-                        $arrError[] = '';
+                        $arrError[] = 'Erreur lors de la tentative de création du compte !';
                     }
                 }
             }
@@ -317,33 +332,40 @@
                 $objUser->hydrate($_POST);
                 $arrError	= $this->verifInfos($objUser);
 
-                if($_FILES['photo']['error'] != 4) {
+                $arrTypeAllowed	= array('image/jpeg', 'image/png', 'image/webp');
+				if ($_FILES['photo']['error'] != 4){
 
-                    $arrTypeFile = array('image/jpeg', 'image/png');
+					if (!in_array($_FILES['photo']['type'], $arrTypeAllowed)){
+					$arrError['photo'] = "Le type de fichier n'est pas autorisé";
+					}else{
+						switch ($_FILES['photo']['error']){
+							case 0 :
+								$strImageName	= uniqid().".webp";
+							//Getting the original image name
+								$strOldImg	= $objUser->getPhoto();
 
-                    if(!in_array($_FILES['photo']['type'], $arrTypeFile)){
-                        $arrError['photo'] = "Le type de fichier n'est pas autorisé (veuillez utiliser un fichier JPEG ou PNG).";
-                    }
+								$objUser->setPhoto($strImageName);
+								break;
 
-                    if(!isset($arrError['photo'])){
-                        $strImageName = uniqid();
-
-                        switch($_FILES['photo']['type']){
-                            case 'image/jpeg' : $strImageName .= '.jpg'; break;
-                            case 'image/png' : $strImageName .= '.png'; break;
-                        }
-
-                        $strDest = 'assets/img/users/' . $strImageName;
-
-                        if(move_uploaded_file($_FILES['photo']['tmp_name'], $strDest)){
-                            $objUser->setPhoto($strImageName);
-                        } else {
-                            $arrError['photo'] = "Erreur lors du téléchargement";
-                        }
+							case 1 :
+								$arrError['photo'] = "Le fichier est trop volumineux";
+								break;
+							case 2 :
+								$arrError['photo'] = "Le fichier est trop volumineux";
+								break;
+							case 3 :
+								$arrError['photo'] = "Le fichier a été partiellement téléchargé";
+								break;
+							case 6 :
+								$arrError['photo'] = "Le répertoire temporaire est manquant";
+								break;
+							default :
+								$arrError['photo'] = "Erreur sur l'image";
+								break;
+						}
                     }
                 }
 
-                $password = $objUser->getPwd();
                 $strPwdConfirm = $objUser->getPwdConfirm();
 
                 if (!empty($objUser->getPwd())) {
@@ -355,6 +377,22 @@
                     $boolUpdate = $objUserModel->settingsUser($objUser);
 
                     if($boolUpdate){
+                        if (isset($strImageName)){
+						
+						    $strDest = 'assets/img/users/' . $strImageName;
+						
+                            if (move_uploaded_file($_FILES['photo']['tmp_name'], $strDest)) {
+                                if (!empty($strOldImg)) {
+                                    $strOldFile = 'assets/img/users/'.$strOldImg;
+                                    if (file_exists($strOldFile) && $strOldImg != 'defaultImgUser.jpg') {
+                                        unlink($strOldFile);
+                                    }
+                                    
+                                }
+                                $this->_resize($strDest,300, 300);
+                            }
+					    }
+
                         $_SESSION['user']['user_pseudo'] = $objUser->getPseudo();
 
                         $_SESSION['success'] = "Le profil à bien été mis à jour";
@@ -703,27 +741,64 @@
         public function allUser(){
             $this->_checkAccess(3);
 
+            $arrError = [];
+            $objUserModel = new UserModel;
+
+            if(isset($_POST['id']) && isset($_POST['reason']) && isset($_SESSION['user']) && $_SESSION['user']['user_funct_id'] == 3){
+                $objReport = new ReportEntity;
+                $objReport->hydrate($_POST);
+
+                if(empty($objReport->getReason())){
+                    $arrError[] ="veuillez renseigner un raison !";
+                }
+
+                if(strlen($objReport->getReason()) > 255){
+                    $arrError[] ="La limite caractére est de 255 !";
+                }
+
+                if(count($arrError) == 0){
+                    $boolResult = $objUserModel->banUser($objReport);
+
+                    if($boolResult){
+                        $_SESSION['success'] = "L'utilisateur à était Bannie !";
+                        $this->_selfRedirect();
+                    } else{
+                        $arrError[] = "Erreur lors du banissement";
+                    }
+                }
+            }
+
+            if(isset($_POST['unBanUser']) && $_SESSION['user']['user_funct_id'] == 3){
+                $boolResult = $objUserModel->unBanUser($_POST['unBanUser']);
+
+                if($boolResult){
+                    $_SESSION['success'] = "L'utilisateur a était banni !";
+                    $this->_selfRedirect();
+                } else{
+                    $arrError[] = "erreur lors de la tentative de suppression !";
+                }
+            }
+
             $search = $_GET['search'] ?? NULL;
             $filter = $_GET['filter'] ?? 'all';
 
-			$objUserModel 	= new UserModel;
-			$arrUsers 		= $objUserModel->findAllUsers();
-            $arrUsers       = $objUserModel->findAllUsersWithFilters($search, $filter);
+            $arrUsers = $objUserModel->findAllUsersWithFilters($search, $filter);
 
-			$arrUserToDisplay	= array();
+            $arrUserToDisplay = array();
 
-			foreach($arrUsers as $arrDetUser){
-				$objUser = new UserEntity;
-				$objUser->hydrate($arrDetUser);
-				$arrUserToDisplay[]	= $objUser;
-			}
+            foreach($arrUsers as $arrDetUser){
+                $objUser = new UserEntity;
+                $objUser->hydrate($arrDetUser);
+                $arrUserToDisplay[] = $objUser;
+            }
 
-			$this->_arrData['arrUserToDisplay']	    = $arrUserToDisplay;
-            $this->_arrData['searchTerm']           = $search;
-            $this->_arrData['filter']               = $filter;
+            $this->_arrData['arrUserToDisplay'] = $arrUserToDisplay;
+            $this->_arrData['searchTerm'] = $search;
+            $this->_arrData['filter'] = $filter;
+            $this->_arrData['arrError'] = $arrError;
 
-			$this->_display("allUser");
-		}
+            $this->_display("allUser");
+        }
 
         /**
          * @brief Manages administrative user profile settings and updates.
@@ -746,6 +821,10 @@
             $objUserModel	= new UserModel;
             $arrUser		= $objUserModel->userPage($_GET['id']??$_SESSION['user']['user_id']);
 
+            if(!$arrUser){
+                $this->_redirect("error/err404");
+            }
+
             $objUser	= new UserEntity;
             $objUser->hydrate($arrUser);
 
@@ -756,29 +835,37 @@
                 $objUser->hydrate($_POST);
                 $arrError	= $this->verifInfos($objUser);
 
-                if($_FILES['photo']['error'] != 4) {
+                $arrTypeAllowed	= array('image/jpeg', 'image/png', 'image/webp');
+				if ($_FILES['photo']['error'] != 4){
 
-                    $arrTypeFile = array('image/jpeg', 'image/png');
+					if (!in_array($_FILES['photo']['type'], $arrTypeAllowed)){
+					$arrError['photo'] = "Le type de fichier n'est pas autorisé";
+					}else{
+						switch ($_FILES['photo']['error']){
+							case 0 :
+								$strImageName	= uniqid().".webp";
+							//Getting the original image name
+								$strOldImg	= $objUser->getPhoto();
 
-                    if(!in_array($_FILES['photo']['type'], $arrTypeFile)){
-                        $arrError['photo'] = "Le type de fichier n'est pas autorisé (veuillez utiliser un fichier JPEG ou PNG).";
-                    }
+								$objUser->setPhoto($strImageName);
+								break;
 
-                    if(!isset($arrError['photo'])){
-                        $strImageName = uniqid();
-
-                        switch($_FILES['photo']['type']){
-                            case 'image/jpeg' : $strImageName .= '.jpg'; break;
-                            case 'image/png' : $strImageName .= '.png'; break;
-                        }
-
-                        $strDest = 'assets/img/users/' . $strImageName;
-
-                        if(move_uploaded_file($_FILES['photo']['tmp_name'], $strDest)){
-                            $objUser->setPhoto($strImageName);
-                        } else {
-                            $arrError['photo'] = "Erreur lors du téléchargement";
-                        }
+							case 1 :
+								$arrError['photo'] = "Le fichier est trop volumineux";
+								break;
+							case 2 :
+								$arrError['photo'] = "Le fichier est trop volumineux";
+								break;
+							case 3 :
+								$arrError['photo'] = "Le fichier a été partiellement téléchargé";
+								break;
+							case 6 :
+								$arrError['photo'] = "Le répertoire temporaire est manquant";
+								break;
+							default :
+								$arrError['photo'] = "Erreur sur l'image";
+								break;
+						}
                     }
                 }
 
@@ -786,11 +873,26 @@
                     $boolUpdate = $objUserModel->settingsAllUser($objUser);
 
                     if($boolUpdate){
-                        if($objUser->getPseudo() == $_SESSION['user']['user_pseudo']){
+
+                        if (isset($strImageName)){
+						
+						    $strDest = 'assets/img/users/' . $strImageName;
+						
+                            if (move_uploaded_file($_FILES['photo']['tmp_name'], $strDest)) {
+                                if (!empty($strOldImg)) {
+                                    $strOldFile = 'assets/img/users/'.$strOldImg;
+                                    if (file_exists($strOldFile) && $strOldImg != 'defaultImgUser.jpg') {
+                                        unlink($strOldFile);
+                                    }
+                                    
+                                }
+                                $this->_resize($strDest,300, 300);
+                            }
+					    }
 
                         $_SESSION['success'] = "Le profil à bien été mis à jour";
                         $this->_redirect("user/allUser");
-                        }
+                        
                     }else{
                         $arrError[] = "Erreur lors de la mise a jours, veuillez reessayer";
                     }

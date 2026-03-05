@@ -1,6 +1,6 @@
 {extends file="views/layout_view.tpl"}
 {block name="title" prepend}403{/block}
-{block name="description"}Erreur 403 page intropuvable{/block}
+{block name="description"}Erreur 403, page introuvable{/block}
 
 {block name="content"}
 <div class="container-fluid d-flex align-items-center justify-content-center bg-white" style="min-height: 75vh;">

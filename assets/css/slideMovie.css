@@ -3,8 +3,10 @@
     align-items: center;
 }
 
+
+
 .splide__slide img {
-    max-height: 300px;
+    max-height: clamp(200px, 30vw, 300px);
     height: 100%;
     width: auto;
     display: block;

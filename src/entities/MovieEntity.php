@@ -142,6 +142,16 @@
 		}
 
 		/**
+		 * @brief Returns a summary of the description.
+		 * @param int $intNbCar Max characters (default 120).
+		 * @return string The truncated string with "...".
+		 */
+
+		public function getSummary(int $intNbCar = 120):string{
+			return mb_strimwidth($this->_description, 0, $intNbCar, "...");
+		}
+
+		/**
         * Updating the description
         * @param string $strContent the new description
         */
@@ -156,9 +166,6 @@
         * @return string the truncated description
         */
 
-		public function getSummary(int $intNbCar = 70):string{
-			return mb_strimwidth($this->_description, 0, $intNbCar, "...");
-		}
 
 		/**
         * Getting the raw release date
@@ -293,7 +300,7 @@
         */
 
 		public function getLength():string{
-			return $this->_length;
+		return str_replace(':00', '', $this->_length);
 		}
 
 		/**

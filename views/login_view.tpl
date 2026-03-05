@@ -6,14 +6,14 @@
     <section id="login" class="container py-5 my-auto" style="min-height: 75vh;" >
         <!-- include messages  -->
         <h1 class="text-center">Connexion</h1>
-        <p class="mx-auto text-center py-2">Si vous n'avez pas de compte vous pouvez en créer un sur la page d'<a
-                href="{$smarty.env.BASE_URL}user/createAccount" class="text-dark">inscription</a> !</p>
+        <p class="mx-auto text-center py-2">Si vous n'avez pas de compte, vous pouvez en créer un sur la page <a
+                href="{$smarty.env.BASE_URL}user/createAccount" class="text-dark">d'inscription</a> !</p>
         <form method="post">
             <input type="hidden" name="csrf_token" value="{$smarty.session.csrf_token}">
             <div class="form-group py-3">
                 <label class="form-label">Adresse e-mail</label>
                 <input type="email" name="email" class="form-control {if (isset($arrError['email']))} is-invalid{/if}"
-                    value="{$objUser->getEmail()}" placeholder="Email">
+                    value="{$objUser->getEmail()}" placeholder="E-mail">
             </div>
             <div class="form-group py-3">
                 <label class="form-label">Mot de passe</label>

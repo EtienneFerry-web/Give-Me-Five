@@ -67,7 +67,7 @@ function updateNote(value) {
  */
 async function insertNote(value) {
     try {
-        const response = await fetch(`http://localhost/GiveMeFive/movie/note/${movieId}`, {
+        const response = await fetch(`${url}movie/note/${movieId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

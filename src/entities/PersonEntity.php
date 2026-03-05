@@ -12,7 +12,7 @@
 		private string 	$_name = '';
 		private string 	$_firstname = '';
 		private string 	$_birthdate;
-		private ?string $_deathdate= "";
+		private ?string $_deathdate= NULL;
 		private ?string $_bio = "";
 		private string 	$_country;
 		private string 	$_photo;

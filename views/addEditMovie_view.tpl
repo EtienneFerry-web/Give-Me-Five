@@ -1,18 +1,18 @@
 {extends file="views/layout_view.tpl"}
 {if ($objMovie->getId()|is_null)}
 {block name="title" prepend}Ajouter un film{/block}
-{block name="description"}Ici vous pouvez ajouter un film !{/block}
+{block name="description"}Ici, vous pouvez ajouter un film !{/block}
 {else}
 {block name="title" prepend}Modifier un film{/block}
-{block name="description"}Ici vous pouvez modifier un film !{/block}
+{block name="description"}Ici, vous pouvez modifier un film !{/block}
 {/if}
 {block name="content"}
 <section id="addMovie" class="container py-5 my-auto">
 	{if ($objMovie->getId()|is_null)}
 	<h1 class="text-center">Demande d'ajout de film</h1>
 	<p class="mx-auto text-center py-2">Vous ne trouvez pas votre film préféré dans notre catalogue ? Aidez-nous à
-		enrichir notre base de données ! Remplissez le formulaire ci-dessous avec les informations du film, et notre
-		équipe l'ajoutera après vérification. </a></p>
+			Enrichir notre base de données ! Remplissez le formulaire ci-dessous avec les informations du film, et notre
+			L'équipe l'ajoutera après vérification.</p>
 	{else}
 	<h1 class="text-center">Modifier un film</h1>
 	{/if}
@@ -81,7 +81,7 @@
 				<input name="photo" id="photo" type="file" class="form-control " value="{$objMovie->getPhoto()}">
 			</div>
 			<div class="form-group py-2">
-				<label class="form-label">Trailer du film</label>
+				<label class="form-label">Bande-annonce du film</label>
 				<input name="trailer_url" type="text" class="form-control" value="{$objMovie->getTrailer()}"
 					placeholder="Collez le lien du trailer">
 			</div>

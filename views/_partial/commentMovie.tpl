@@ -72,12 +72,12 @@
                                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                 </div>
                                 <div class="modal-body">
-                                    <p>Pour que votre signalement sois prit en charge veuillez renseigner la raison !</p>
+                                    <p>Pour que votre signalement soit pris en charge veuillez renseigner la raison !</p>
                                     <textarea name="commentReport" class="form-control" placeholder="Raison du signalement..."></textarea>
                                 </div>
                                 <div class="modal-footer border-0 mx-auto">
                                     <button type="button" class="btn btn-outline-dark px-3" data-bs-dismiss="modal">Annuler</button>
-                                    <button type="submit" class="btn btn-outline-success px-3">Validez</button>
+                                    <button type="submit" class="btn btn-outline-success px-3">Valider</button>
                                 </div>
                             </form>
                         </div>
@@ -95,7 +95,7 @@
                                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                 </div>
                                 <div class="modal-body">
-                                    <p>Voulez vous vraiment supprimer votre signalement ?</p>
+                                    <p>Voulez-vous vraiment supprimer votre signalement ?</p>
                                 </div>
                                 <div class="modal-footer border-0 mx-auto">
                                     <button type="button" class="btn btn-outline-dark px-3" data-bs-dismiss="modal">Annuler</button>

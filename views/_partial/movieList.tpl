@@ -4,7 +4,7 @@
     </div>
     <div class="col-8 text-start">
         <a href="{$smarty.env.BASE_URL}movie/moviePage/{$objMovie->getId()}" class="link"><h2>{$objMovie->getTitle()}</h2></a>
-        <p>{$objMovie->getDescription()}</p>
+        <p>{$objMovie->getSummary(160)}</p>
         <span class="pageMovieNote spanMovie" data-note="{$objMovie->getRating()}">
             <span class="stars d-inline-block"></span>
             <span class="note d-inline-block">{$objMovie->getRating()}</span>

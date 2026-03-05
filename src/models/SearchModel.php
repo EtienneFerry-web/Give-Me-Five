@@ -75,7 +75,7 @@ class SearchModel extends Connect {
                                     WHEN user_pseudo LIKE :startSearch THEN 2
                                     ELSE 3 END AS score
                                 FROM users
-                                WHERE user_pseudo LIKE :fullSearch";
+                                WHERE user_pseudo LIKE :fullSearch AND user_deleted_at IS NULL AND (user_ban_at < NOW() OR user_ban_at IS NULL)";
         }
 
         // Closing the subquery and applying global ordering

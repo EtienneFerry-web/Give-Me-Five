@@ -7,7 +7,7 @@
 const searchForm = document.querySelector('#formSearch');
 const searchBar = document.getElementById('searchBar');
 const sugesContainer = document.getElementById('suggestions');
-var csrfToken = document.querySelector('meta[name="csrf_token"]').content;
+// var csrfToken = document.querySelector('meta[name="csrf_token"]').content;
 let historique = JSON.parse(localStorage.getItem('allSearch')) || [];
 let timer;
 
@@ -35,7 +35,7 @@ function saveSearch(keyword) {
 async function searchData() {
     const keywords = searchBar.value;
     try {
-        const response = await fetch(`http://localhost/GiveMeFive/search/autoComplete`, {
+        const response = await fetch(`${url}search/autoComplete`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

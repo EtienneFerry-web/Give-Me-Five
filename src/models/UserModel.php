@@ -58,7 +58,7 @@
 		public function findAllUsersWithFilters(?string $strSearch, string $strFilter): array {
 
 
-			$strRq = "SELECT user_id, user_firstname, user_name, user_pseudo, user_email, user_funct_id
+			$strRq = "SELECT user_id, user_firstname, user_name, user_pseudo, user_email, user_funct_id, user_ban_at
 						FROM users
 						WHERE user_deleted_at IS NULL";
 
@@ -119,7 +119,7 @@
 
 		public function verifUser(string $strEmail, string $strPwd):array|bool{
 		    //Basic query to find a user
-			$strRq	= "SELECT user_id, user_name, user_firstname, user_pseudo ,user_pwd, user_funct_id, user_email
+			$strRq	= "	SELECT user_id, user_name, user_firstname, user_pseudo ,user_pwd, user_funct_id, user_email, user_ban_at, user_reason_ban
 						FROM users
 						WHERE user_email = '".$strEmail."'";
 			$arrUser 	= $this->_db->query($strRq)->fetch();
@@ -160,7 +160,7 @@
 			$arrInsertRequest = $rqPrep1->fetch();
 
 			
-			if(isset($arrInsertRequest['user_email'])){
+			if(isset($arrInsertRequest['user_email']) && !empty($arrInsertRequest['user_email'])){
 			   return $arrInsertRequest;
 				exit;
 			} else{
@@ -257,6 +257,7 @@
                             WHERE rep_reported_user_id = user_id
                             AND rep_reporter_user_id = $idConnectUser
                             AND rep_pseudo_user IS NOT NULL
+							AND rep_deleted_at IS NULL
                             ) AS 'user_reported'
                         FROM users
                         INNER JOIN functions ON users.user_funct_id = functions.funct_id
@@ -274,7 +275,7 @@
          */
 
         public function deleteUser(int $intId){
-			$strRq = "UPDATE users SET user_deleted_at = NOW()
+			$strRq = "UPDATE users SET user_deleted_at = NOW(), user_email = NULL
 					  WHERE user_id = :id";
 
 			$rqPrep = $this->_db->prepare($strRq);
@@ -463,7 +464,7 @@
 
     		$rqPrep->bindValue(":id", $intId, PDO::PARAM_INT);
 
-    		$rqPrep->execute();
+    		return $rqPrep->execute();
 		}
 
 		/**

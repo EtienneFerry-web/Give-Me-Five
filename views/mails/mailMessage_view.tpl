@@ -13,7 +13,7 @@
 
                     <tr>
                         <td align="center" style="padding: 30px 20px;">
-                            <img src="http://marco.schmitt.servd16161.odns.fr/GiveMeFive/assets/img/logo_givemefive.png" alt="Give Me Five" width="200" style="display: block;">
+                            <img src="{$smarty.env.BASE_URL}assets/img/logo_givemefive.png" alt="Give Me Five" width="200" style="display: block;">
                             <h1 style="color: #2c3e50; font-size: 20px; margin-top: 15px;">Give Me Five</h1>
                         </td>
                     </tr>
@@ -33,7 +33,7 @@
 
                     <tr>
                         <td align="center" style="padding-bottom: 40px;">
-                            <a href="http://marco.schmitt.servd16161.odns.fr/Projet2/" style="background-color: #212529; color: #ffffff; padding: 12px 25px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">
+                            <a href="{$smarty.env.BASE_URL}" style="background-color: #212529; color: #ffffff; padding: 12px 25px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">
                                 Accéder au site
                             </a>
                         </td>

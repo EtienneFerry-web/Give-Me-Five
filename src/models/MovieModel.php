@@ -45,7 +45,7 @@
                         LEFT JOIN photos ON movies.mov_id = photos.pho_mov_id
                         LEFT JOIN ratings ON movies.mov_id = ratings.rat_mov_id
                         LEFT JOIN liked ON movies.mov_id = liked.lik_mov_id AND liked.lik_com_id IS NULL
-                        WHERE mov_release_date BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() AND photos.pho_type = 'Affiche'
+                        WHERE mov_release_date BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() AND photos.pho_type = 'Affiche' AND mov_published_at IS NOT NULL
                         GROUP BY movies.mov_id,  pho_photo
                         ";
 

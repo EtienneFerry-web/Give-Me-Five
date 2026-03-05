@@ -1,6 +1,6 @@
 {extends file="views/layout_view.tpl"}
 {block name="title" prepend}Dashboard{/block}
-{block name="description"}{/block}
+{block name="description"}Dashboard film de Give Me Five{/block}
 
 {block name="css_variation"}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">

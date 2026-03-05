@@ -1,6 +1,6 @@
 {extends file="views/layout_view.tpl"}
-{block name="title" prepend}Ajouter un film{/block}
-{block name="description"}Ici vous pouvez ajouter un film !{/block}
+{block name="title" prepend}Page profil utilisateur{/block}
+{block name="description"}Voici le profil de {$objUser->getPseudo()}{/block}
 
 {block name="css_variation"}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/css/splide-core.min.css">
@@ -10,7 +10,7 @@
 {block name="content"}
 
 <section id="user" class="container py-2">
-   <div class="col-12 row text-center align-items-center text-md-start py-2 mx-auto">
+   <div class="col-12 row text-center align-items-center text-md-start py-4 mx-auto">
     <div class="col-8 col-md-3 col-lg-2 mx-auto mb-3 mb-md-0">
         <img src="{$smarty.env.BASE_URL}assets/img/users/{$objUser->getPhoto()}" alt="image de profil" class="img-fluid rounded-circle">
     </div>
@@ -140,7 +140,7 @@
             <div class="splide__track">
                 <ul class="splide__list">
                 {foreach from=$arrImageToDisplay item=objImage}
-                    {if isset($smarty.session.user) && $smarty.session.user.user_id == $smarty.get.id || $smarty.session.user.user_funct_id >= 2}
+                    {if (isset($smarty.session.user)) && ($smarty.session.user.user_id == $smarty.get.id || $smarty.session.user.user_funct_id >= 2)}
                     <li class="splide__slide position-relative overlay-container">
                         <img src="{$smarty.env.BASE_URL}assets/img/movie/{$objImage->getPhoto()}" class="img-fluid" />
 
@@ -165,8 +165,8 @@
     </section>
 {/if}
 {if !empty($arrCommentToDisplay)}
-<section id="review" class="container text-center">
-    <h2>Vos review / {$objUser->getPseudo()}</h2>
+<section id="review" class="container text-center py-4">
+    <h2>Avis</h2>
     <div class="col-12 col-md-10 mx-auto py-1 scrollList">
         {foreach $arrCommentToDisplay as $review}
             {include file="views/_partial/reviewMovie.tpl"}

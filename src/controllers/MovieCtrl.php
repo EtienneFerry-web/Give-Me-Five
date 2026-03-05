@@ -399,18 +399,8 @@
 
 					$objComment = new CommentEntity;
 					$objComment->hydrate($arrData);
-						// $objComment->setComment($_POST['com_comment']);
-						// $objComment->setUser_id($_SESSION['user']['user_id']);
-						// $objComment->setRating($_POST['rating']);
-						// $objComment->setmovieId($_GET['id']);
 
 					if(count($arrError)===0) {
-
-						$objComment = new CommentEntity;
-						$objComment->setComment($_POST['com_comment']);
-						$objComment->setUser_id($_SESSION['user']['user_id']);
-						$objComment->setRating($_POST['rating']);
-						$objComment->setmovieId($_GET['id']);
 
 						$comment = $objCommentModel->commentInsert($objComment);
 
@@ -433,7 +423,7 @@
 			if(isset($_POST['spoiler']) && $_SESSION['user']['user_funct_id'] != 1){
 
 			    if($objCommentModel->addSpoiler($_POST['spoiler'])){
-					$_SESSION['success'] = "Spoiler Update !";
+					$_SESSION['success'] = "Spoiler mis à jour !";
 					$this->_selfRedirect();
 				}
 				
@@ -631,14 +621,14 @@
 						
 						$strDest = 'assets/img/movie/' . $strImageName;
 						
-						var_dump($strImageName);		
+						
 						if (move_uploaded_file($_FILES['photo']['tmp_name'], $strDest)) {
 							if (!empty($strOldImg)) {
 								$strOldFile = 'assets/img/movie/'.$strOldImg;
 								if (file_exists($strOldFile)) {
 								 	unlink($strOldFile);
 								}
-								var_dump($strOldImg);
+								
 							}
 							$this->_resize($strDest,280, 400);
 						}

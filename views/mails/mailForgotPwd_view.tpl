@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Email Give Me Five</title>
+    <title>E-mail Give Me Five</title>
 </head>
 <body style="margin: 0; padding: 0; background-color: #f4f7f9; font-family: 'Segoe UI', Arial, sans-serif;">
     <table width="100%" border="0" cellspacing="0" cellpadding="0" style="padding: 20px;">
@@ -13,14 +13,14 @@
 
                     <tr>
                         <td align="center" style="padding: 30px 20px;">
-                            <img src="http://marco.schmitt.servd16161.odns.fr/GiveMeFive/assets/img/logo_givemefive.png" alt="Give Me Five" width="200" style="display: block;">
+                            <img src="{$smarty.env.BASE_URL}assets/img/logo_givemefive.png" alt="Give Me Five" width="200" style="display: block;">
                             <h1 style="color: #2c3e50; font-size: 20px; margin-top: 15px;">Give Me Five</h1>
                         </td>
                     </tr>
 
                     <tr>
                         <td style="padding: 0 40px 30px 40px; color: #4a4a4a; line-height: 1.5;">
-                            <h4 style="text-align: center;">Réinitialisation de votre mots passe</h4>
+                            <h4 style="text-align: center;">Réinitialisation de votre mot de passe</h4>
 
                             <p style="font-size: 16px; text-align: center;">
                                 Veuillez cliquer sur le lien ci-dessous pour créer un nouveau mot de passe

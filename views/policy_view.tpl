@@ -24,9 +24,9 @@
                     Le responsable du traitement des données est :
                 </p>
                 <ul>
-                    <li>Nom / Raison sociale : <strong>À compléter</strong></li>
-                    <li>Adresse : <strong>Adresse complète</strong></li>
-                    <li>Email de contact : <strong>contact@exemple.fr</strong></li>
+                    <li>Nom / Raison sociale : <strong>Groupe 2</strong></li>
+                    <li>Adresse : <strong>4 rue du Rhin, 68000 COLMAR</strong></li>
+                    <li>Email de contact : <strong>contact@givemefive.fr</strong></li>
                 </ul>
             </section>
 

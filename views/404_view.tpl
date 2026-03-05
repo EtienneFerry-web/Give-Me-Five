@@ -1,6 +1,6 @@
 {extends file="views/layout_view.tpl"}
 {block name="title" prepend}404{/block}
-{block name="description"}Erreur 404 page intropuvable{/block}
+{block name="description"}Erreur 404, page introuvable{/block}
 
 {block name="css_variation"}
     <link rel="stylesheet" href="{$smarty.env.BASE_URL}assets/css/404.css">

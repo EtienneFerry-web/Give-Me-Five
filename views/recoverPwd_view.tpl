@@ -11,11 +11,11 @@
                 <input type="hidden" name="csrf_token" value="{$smarty.session.csrf_token}">
                 <div class="form-group py-2">
                     <label for="" class="form-label">Mot de Passe</label>
-                    <input type="text" name="pwd" value="" class="form-control">
+                    <input type="password" name="pwd" value="" class="form-control">
                 </div>
                 <div class="form-group py-2">
-                    <label for="" class="form-label">Confirmation du Mots de Passe</label>
-                    <input type="text" name="pwdConfirm" value="" class="form-control">
+                    <label for="" class="form-label">Confirmation du mot de passe</label>
+                    <input type="password" name="pwdConfirm" value="" class="form-control">
                 </div>
                 <input class="w-100 btnCustom" type="submit" value="Se connecter">
             </form>

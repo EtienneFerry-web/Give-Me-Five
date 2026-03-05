@@ -232,10 +232,10 @@
             $this->_objMail->SMTPDebug  = 0;
 
             // Mail server connection settings
-            $this->_objMail->SMTPAuth       = TRUE;
-            $this->_objMail->SMTPSecure     = "tls";
+            $this->_objMail->SMTPAuth       = true;
+            $this->_objMail->SMTPSecure     = "ssl";
             $this->_objMail->Port           = $_ENV['MAIL_PORT'];
-            $this->_objMail->Host           = "smtp.gmail.com";
+            $this->_objMail->Host           = "servd16161.o2switch.net";
             $this->_objMail->Username       = $_ENV['MAIL_USERNAME'];
             $this->_objMail->Password       = $_ENV['MAIL_PASSWORD'];
 

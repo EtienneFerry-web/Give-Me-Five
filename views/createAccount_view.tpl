@@ -50,21 +50,21 @@
                         name="email"
                         class="form-control {if (isset($arrError['email']))} is-invalid{/if}" 
                         value="{$objUser->getEmail()}"
-                        placeholder="Email">
+                        placeholder="E-mail">
             </div>
             <div class="form-group py-2">
                 <label class="form-label" >Mot de passe :</label>
                 <input  type="password" 
                         name="pwd"
                         class="form-control {if (isset($arrError['pwd']))} is-invalid {/if}"  
-                        placeholder="Mots de Passe">
+                        placeholder="Mot de Passe">
             </div>
             <div class="form-group py-2">
                 <label class="form-label">Confirmation du mot de passe :</label>
                 <input  type="password" 
                         name="pwd_confirm"
                         class="form-control {if (isset($arrError['pwd_confirm']))} is-invalid {/if}"  
-                        placeholder="Mots de passe de comfirmation">
+                        placeholder="Confirmation du mot de passe">
             </div>
             <input class="w-100 btnCustom" type="submit" >
         </form>

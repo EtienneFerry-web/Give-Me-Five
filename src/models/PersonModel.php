@@ -185,18 +185,23 @@
                    SET  pers_name = :name, 
                         pers_firstname = :firstname, 
                         pers_birthdate = :birthdate, 
-                        pers_deathdate = :deathdate, 
                         pers_nat_id = :nat_id, 
                         pers_photo = :photo,
-                        pers_updated_at = NOW()
-                   WHERE pers_id = :id";
+                        pers_updated_at = NOW()";
+        if(!empty($objPerson->getDeathdate())){   
+            $strRq .=", pers_deathdate = :deathdate";
+        }
+                        
+               $strRq .=" WHERE pers_id = :id";
 
         $rqPrep = $this->_db->prepare($strRq);
         $rqPrep->bindValue(':id', $objPerson->getId(), PDO::PARAM_INT);
         $rqPrep->bindValue(':name', $objPerson->getName(), PDO::PARAM_STR);
         $rqPrep->bindValue(':firstname', $objPerson->getFirstname(), PDO::PARAM_STR);
         $rqPrep->bindValue(':birthdate', $objPerson->getBirthdate(), PDO::PARAM_STR);
-        $rqPrep->bindValue(':deathdate', $objPerson->getDeathdate(), PDO::PARAM_STR);
+        if(!empty($objPerson->getDeathdate())){
+            $rqPrep->bindValue(':deathdate', $objPerson->getDeathdate(), PDO::PARAM_STR);
+        }
         $rqPrep->bindValue(':nat_id', $objPerson->getCountry(), PDO::PARAM_INT);
         $rqPrep->bindValue(':photo', $objPerson->getPhoto(), PDO::PARAM_STR);
 

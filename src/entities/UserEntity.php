@@ -28,6 +28,7 @@
 		private string 	$_function;
 		private string 	$_pwd;
 		private string 	$_pwdConfirm;
+		private ?string $_ban_at;
 		private int 	$_reported = 0;
 		private int 	$_funct_id = 1;
 		private int 	$_nb_comments = 0;
@@ -65,8 +66,31 @@
 		public function setNb_comments(int $intNbComment){
 			$this->_nb_comments = $intNbComment;
 		}
-
-
+		
+		/**
+        * Sets the ban date.
+        *
+        * @param string|null $strban The ban date string or null to unban.
+        * @return void
+        */
+		
+		public function setBan_at(?string $strban){
+			$this->_ban_at = $strban;
+		}
+		
+		/**
+        * Checks if the entity is currently banned.
+        *
+        * @return bool True if a ban date is set, false otherwise.
+        */
+		
+		public function getBanAt(){
+			if(is_null($this->_ban_at)){
+				return false;
+			} else{
+				return true;
+			}
+		}
 
 
 		/**

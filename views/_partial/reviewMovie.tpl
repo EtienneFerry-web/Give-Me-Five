@@ -21,7 +21,7 @@
             <div class="flex-grow-1 py-3">
                 <p class="comment-text">{$review->getComment()}</p>
 
-                <span class="pageMovieNote spanMovie d-block text-start" data-note="{$review->getRating()}">
+                <span class="pageMovieNote spanMovie d-block text-start border-0" data-note="{$review->getRating()}">
                     <span class="stars"></span>
                     <span class="note note-display">{$review->getRating()}</span>
                 </span>
@@ -44,7 +44,7 @@
             </div>
 
             <div class="row align-items-center pt-3">
-                <span class="spanMovie d-block col-6">{$review->getDateFormat()}</span>
+                <span class="spanMovie d-block col-6 border-0">{$review->getDateFormat()}</span>
                 {if isset($smarty.session.user) && $smarty.session.user.user_funct_id != 1 && $smarty.session.user.user_id != $smarty.get.id}
                     <form method="post" class="d-block ms-auto col-auto">
                         <input type="hidden" name="csrf_token" value="{$smarty.session.csrf_token}">

@@ -7,16 +7,16 @@
     
         <div class="mx-auto" style="width: 100%;">
             <h1 class="text-center">Mot de passe oublié</h1>
-            <p class="text-center py-2">Renseigner son mail pour changer son mot de passe</p>
+            <p class="text-center py-2">Renseignez votre e-mail pour changer votre mot de passe.</p>
             
             <form method="post">
                 <input type="hidden" name="csrf_token" value="{$smarty.session.csrf_token}">
                 <div class="form-group py-3">
                     <label class="form-label">Adresse e-mail</label>
                     <input type="email" name="email" class="form-control {if (isset($arrError['email']))} is-invalid{/if}"
-                        value="{$objUser->getEmail()}" placeholder="Email">
+                        value="{$objUser->getEmail()}" placeholder="E-mail">
                 </div>
-                <input class="w-100 btnCustom" type="submit" value="Se connecter">
+                <input class="w-100 btnCustom" type="submit" value="Envoyer">
             </form>
         </div>
 

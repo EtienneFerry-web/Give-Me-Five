@@ -105,7 +105,7 @@
             $this->_checkAccess(2);
 
             $objPersonModel = new PersonModel();
-            var_dump($_POST);
+            
             $objPerson = new PersonEntity();
             
 
@@ -121,7 +121,7 @@
 
                 $arrCountryToDisplay[]  = $objPerson;
             }
-            var_dump($arrPerson);
+            
 			$objPerson->hydrate($arrPerson);
 
             $arrError = [];
@@ -202,20 +202,20 @@
                 if (count($arrError) == 0){
                     $objPerson->setId($_GET['id']);
 
-                    
-                     $strDest = 'assets/img/person/' . $strImageName;
-
-                    if(move_uploaded_file($_FILES['photo']['tmp_name'], $strDest)){
-                        $objPerson->setPhoto($strImageName);
-                        $this->_resize($strDest,280, 350);
-                        $strOldFile = 'assets/img/person/'.$strOldImg;
-                        if (file_exists($strOldFile)) {
-                            unlink($strOldFile);
+                    if(isset($strImageName)){
+                        $strDest = 'assets/img/person/' . $strImageName;
+    
+                        if(move_uploaded_file($_FILES['photo']['tmp_name'], $strDest)){
+                            $objPerson->setPhoto($strImageName);
+                            $this->_resize($strDest,280, 350);
+                            $strOldFile = 'assets/img/person/'.$strOldImg;
+                            if (file_exists($strOldFile)) {
+                                unlink($strOldFile);
+                            }
+                        } else {
+                            $arrError['photo'] = "Erreur lors du téléchargement";
                         }
-                    } else {
-                        $arrError['photo'] = "Erreur lors du téléchargement";
                     }
-
 					$boolUpdate 	= $objPersonModel->updatePerson($objPerson);
 
                     if($boolUpdate){

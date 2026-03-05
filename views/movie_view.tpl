@@ -1,6 +1,6 @@
 {extends file="views/layout_view.tpl"}
 {block name="title" prepend}{$objMovie->getTitle()}{/block}
-{block name="description"}Bienvenue sur notre accueil !!!!{/block}
+{block name="description"}Voici la page {$objMovie->getTitle()} !{/block}
 
 {block name="css_variation"}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/css/splide-core.min.css">
@@ -49,7 +49,7 @@
     <div class="d-flex flex-wrap align-items-center gap-3 justify-content-center justify-content-md-start mb-4">
         <a href="{$objMovie->getTrailer()}" target="_blank" class="spanMovie link">Voir le trailer &#8599;</a>
         <a id="shareMovie" class="spanMovie link" style="cursor:pointer;">Partager &#8599;</a>
-        {if $curDate->format('Y-m-d') <= $objMovie->getRelease_date()}
+        {if $curDate->format('Y-m-d') < $objMovie->getRelease_date()}
         <a href="{$smarty.env.BASE_URL}movie/addToCalendar/{$objMovie->getId()}" 
                class="btn btn-outline-dark btn-sm" 
                title="Ajouter la sortie à mon agenda">
@@ -59,7 +59,7 @@
     </div>
 
     
-    {if isset($smarty.session.user)}
+    {if isset($smarty.session.user) && $curDate->format('Y-m-d') >= $objMovie->getRelease_date()}
     <div class="row g-3 justify-content-center justify-content-md-start align-items-center">
         <div class="col-12 col-sm-auto">
             <form method="POST">
@@ -140,9 +140,9 @@
 </div>
 </section>
 
-{if count($arrImagesToDisplay) > 0 || isset($smarty.session.user)}
+{if count($arrImagesToDisplay) > 0 || isset($smarty.session.user) && $curDate->format('Y-m-d') >= $objMovie->getRelease_date()}
 <section  id="imgMovie" class="container py-5 text-center">
-    <h2>Image du film</h2>
+    <h2>Images du film</h2>
     {if count($arrImagesToDisplay) < 20 && isset($smarty.session.user)}
     <form method="post" class="row text-center" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{$smarty.session.csrf_token}">
@@ -220,8 +220,7 @@
     </section>
 {else}
     <section class="container text-center py-3">
-        <h2>Les commentaires ne sont pas disponibles</h2>
-        <p class="mx-auto">Les commentaires seront disponible lorsque le film sera sorti!</p>
+        <h3>Les commentaires seront disponibles lorsque le film sera sorti !</h3>
     </section>
 
 {/if}

@@ -1,6 +1,6 @@
 {extends file="views/layout_view.tpl"}
-{block name="title" prepend}Accueil{/block}
-{block name="description"}bienvenue sur notre accueil !!!!{/block}
+{block name="title" prepend}Mentions Légales{/block}
+{block name="description"}Voici nos mentions légales !{/block}
 
 {block name="content"}
     <div class="container my-5">

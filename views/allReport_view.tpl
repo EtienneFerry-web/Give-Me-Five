@@ -2,7 +2,7 @@
 
 {block name="title" prepend}Dashboard - Signalements{/block}
 
-{block name="description"}{/block}
+{block name="description"}Dashboard des signalements de Give Me Five{/block}
 
 {block name="css_variation"}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -96,7 +96,7 @@
                             Bannir
                         </button>
                     {/if}
-                        <a href="" class="btn btn-sm btn-outline-dark px-3">Modifier</a>
+                        <a href="{$smarty.env.BASE_URL}user/settingsAllUser/{$objReport->getReportedUserId()}" class="btn btn-sm btn-outline-dark px-3">Modifier</a>
                         <form method="post" class="m-0">
                             <input type="hidden" name="csrf_token" value="{$smarty.session.csrf_token}">
                            {if $objReport->getUserBan()} <button type="submit" name="unBanUser" value="{$objReport->getReportedUserId()}" class="btn btn-outline-success btn-sm px-3">Débannir</button>{/if}

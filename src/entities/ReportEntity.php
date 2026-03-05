@@ -45,7 +45,7 @@
          * @return int|null The ID of the user being reported
          */
 
-        public function getDeleteAt():string{
+        public function getDeletedAt():string{
             if(is_null($this->_delete_at)){
                 return 'En cours de traitement';
             } else{
@@ -53,7 +53,7 @@
             }
         }
 
-        public function setDelete_at(?string $strDate){
+        public function setDeleted_at(?string $strDate){
             $this->_delete_at = $strDate;
         }
 
