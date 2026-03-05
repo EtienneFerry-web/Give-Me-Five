@@ -1,0 +1,19 @@
+var searchData=
+[
+  ['clearloginattempts_0',['clearLoginAttempts',['../class_app_1_1_models_1_1_user_model.html#a3fe0ada3f88f20699944e894ac697e3a',1,'App::Models::UserModel']]],
+  ['commententity_1',['CommentEntity',['../class_app_1_1_entities_1_1_comment_entity.html',1,'App::Entities']]],
+  ['commententity_2ephp_2',['CommentEntity.php',['../_comment_entity_8php.html',1,'']]],
+  ['commentinsert_3',['commentInsert',['../class_app_1_1_models_1_1_comment_model.html#a829d6a0c717ff3c0fd2d795a37f41336',1,'App::Models::CommentModel']]],
+  ['commentmodel_4',['CommentModel',['../class_app_1_1_models_1_1_comment_model.html',1,'App::Models']]],
+  ['commentmodel_2ephp_5',['CommentModel.php',['../_comment_model_8php.html',1,'']]],
+  ['commentmodify_6',['commentModify',['../class_app_1_1_models_1_1_comment_model.html#afcdd4ad5ea6dc8cc64c658a1c67ca282',1,'App::Models::CommentModel']]],
+  ['commentofmovie_7',['commentOfMovie',['../class_app_1_1_models_1_1_comment_model.html#a03b8cb62ca1690949443be3b96745850',1,'App::Models::CommentModel']]],
+  ['connect_8',['Connect',['../class_app_1_1_models_1_1_connect.html',1,'App::Models']]],
+  ['connect_2ephp_9',['Connect.php',['../_connect_8php.html',1,'']]],
+  ['contact_10',['contact',['../class_app_1_1_controllers_1_1_page_ctrl.html#a9f5d7f60267d2c2712109d4bc2937612',1,'App::Controllers::PageCtrl']]],
+  ['countallcomments_11',['countAllComments',['../class_app_1_1_models_1_1_comment_model.html#a55acf9a096808c5932afa39046c0fa43',1,'App::Models::CommentModel']]],
+  ['countalllikes_12',['countAllLikes',['../class_app_1_1_models_1_1_movie_model.html#aea7934be5866db0ef29471abffcf03b9',1,'App::Models::MovieModel']]],
+  ['countallmovies_13',['countAllMovies',['../class_app_1_1_models_1_1_movie_model.html#a24570ec1f117ccb9c988ae4ec29670ed',1,'App::Models::MovieModel']]],
+  ['countstatuser_14',['countStatUser',['../class_app_1_1_models_1_1_user_model.html#aed2df600bc22d27a22abc440f0d27b40',1,'App::Models::UserModel']]],
+  ['createaccount_15',['createAccount',['../class_app_1_1_controllers_1_1_user_ctrl.html#a1dceed346b08991fefe3a6db85bdc7bb',1,'App::Controllers::UserCtrl']]]
+];

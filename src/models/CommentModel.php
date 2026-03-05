@@ -140,7 +140,6 @@
          * @author Etienne
          * Function insert Comment & rating in database
          * @param object $objComment Comment object
-         * @todo la note est ajouté instant donc inutile 
          */
 
         public function commentInsert(object $objComment): array | bool {

@@ -518,7 +518,6 @@
 		* @author Audrey
         * Adding a new movie to the catalog
         * @return void handles form validation, file upload, and database insertion
-		* @todo récupérer la partie d'audrey
         */
 
         public function addEditMovie(){
