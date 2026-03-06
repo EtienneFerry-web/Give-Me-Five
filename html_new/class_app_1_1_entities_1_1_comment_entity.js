@@ -1,0 +1,28 @@
+var class_app_1_1_entities_1_1_comment_entity =
+[
+    [ "__construct", "class_app_1_1_entities_1_1_comment_entity.html#a416fa2b037c01716cb8badc6a0010b22", null ],
+    [ "getComment", "class_app_1_1_entities_1_1_comment_entity.html#adb57c3d1b74c19589ba1d641ea1a390e", null ],
+    [ "getDateFormat", "class_app_1_1_entities_1_1_comment_entity.html#a9614de8652892f4124b7123b080c2c8a", null ],
+    [ "getLike", "class_app_1_1_entities_1_1_comment_entity.html#a999e4b66f85ea6d8d8476dd23ba95817", null ],
+    [ "getMovieId", "class_app_1_1_entities_1_1_comment_entity.html#aaa8e3e52a948f6b724a55450ecb44d3a", null ],
+    [ "getPhoto", "class_app_1_1_entities_1_1_comment_entity.html#ab22481f9416f2c9922712d0850b3c7f1", null ],
+    [ "getPseudo", "class_app_1_1_entities_1_1_comment_entity.html#a7151e41f7b522d26d02102d970e9a309", null ],
+    [ "getRating", "class_app_1_1_entities_1_1_comment_entity.html#a209cc2a79146f673389564ea1315c2a2", null ],
+    [ "getReported", "class_app_1_1_entities_1_1_comment_entity.html#a5411d725fb85c42afdb0d21950f71ac4", null ],
+    [ "getSpoiler", "class_app_1_1_entities_1_1_comment_entity.html#a0acad28a3aa1dd220f940457faa481aa", null ],
+    [ "getTitle", "class_app_1_1_entities_1_1_comment_entity.html#a95e859a4588a39a1824b717378a84c29", null ],
+    [ "getUser_id", "class_app_1_1_entities_1_1_comment_entity.html#a5380938627a38b22f7e47f845d38e617", null ],
+    [ "getUser_liked", "class_app_1_1_entities_1_1_comment_entity.html#a9f684e62db18ba845d407d595138a817", null ],
+    [ "setComment", "class_app_1_1_entities_1_1_comment_entity.html#add3718a94ae593d519d195919660a383", null ],
+    [ "setDatetime", "class_app_1_1_entities_1_1_comment_entity.html#af1a8e9132e4fe9fb6faa3a1336cac0b1", null ],
+    [ "setLike", "class_app_1_1_entities_1_1_comment_entity.html#a9444ae60c2fc686d04ba6328716e3ef6", null ],
+    [ "setMovieId", "class_app_1_1_entities_1_1_comment_entity.html#ae15c422b883947b3c9a93d18d28d5993", null ],
+    [ "setPhoto", "class_app_1_1_entities_1_1_comment_entity.html#a25a01a20f2dc95ef24c0ebfe5306fcc3", null ],
+    [ "setPseudo", "class_app_1_1_entities_1_1_comment_entity.html#adcbe37dbd6994a10ecdaa0fc8fbdd7ef", null ],
+    [ "setRating", "class_app_1_1_entities_1_1_comment_entity.html#a3083cd7ac1ef871d148728242886f465", null ],
+    [ "setReported", "class_app_1_1_entities_1_1_comment_entity.html#ae530d8b63dc952cb9d0d74033a8da14a", null ],
+    [ "setSpoiler", "class_app_1_1_entities_1_1_comment_entity.html#a19f98d02a89e9e69f082af86abaf7d16", null ],
+    [ "setTitle", "class_app_1_1_entities_1_1_comment_entity.html#a0a23176b42fd8a117b07898fa5e57fe2", null ],
+    [ "setUser_id", "class_app_1_1_entities_1_1_comment_entity.html#a0ae023e9e9b046c0eb2ef49a37f8afca", null ],
+    [ "setUser_liked", "class_app_1_1_entities_1_1_comment_entity.html#a4f24643301f2544398ba01b53a1a0842", null ]
+];

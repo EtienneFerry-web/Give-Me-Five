@@ -1,0 +1,21 @@
+var searchData=
+[
+  ['_24_5farrdata_0',['$_arrData',['../class_app_1_1_controllers_1_1_mother_ctrl.html#af0e27b778654ad20ed55b4831a98f300',1,'App::Controllers::MotherCtrl']]],
+  ['_24_5fdb_1',['$_db',['../class_app_1_1_models_1_1_connect.html#abc686c23af6ae116b72bc6adb4482a1f',1,'App::Models::Connect']]],
+  ['_24_5fid_2',['$_id',['../class_app_1_1_dto_1_1_dto.html#a64596e9abf5698aeb32deb0453c7b833',1,'App\\Dto\\Dto\\$_id'],['../class_app_1_1_entities_1_1_entity.html#a64596e9abf5698aeb32deb0453c7b833',1,'App\\Entities\\Entity\\$_id']]],
+  ['_24_5fnow_3',['$_now',['../class_app_1_1_controllers_1_1_mother_ctrl.html#a502d5b70c207d62710047cca2add5882',1,'App::Controllers::MotherCtrl']]],
+  ['_24_5fobjmail_4',['$_objMail',['../class_app_1_1_controllers_1_1_mother_ctrl.html#a209c3c064a973b0b51b0ce59fe031b19',1,'App::Controllers::MotherCtrl']]],
+  ['_24_5fprefixe_5',['$_prefixe',['../class_app_1_1_dto_1_1_dto.html#a9407fce1db02c01084f21e4275a1ce99',1,'App\\Dto\\Dto\\$_prefixe'],['../class_app_1_1_entities_1_1_entity.html#a9407fce1db02c01084f21e4275a1ce99',1,'App\\Entities\\Entity\\$_prefixe']]],
+  ['_24actor_6',['$actor',['../class_app_1_1_models_1_1_movie_model.html#a1f1c788592f8ab4e3626cc16a8fb5ff7',1,'App::Models::MovieModel']]],
+  ['_24categories_7',['$categories',['../class_app_1_1_models_1_1_movie_model.html#a2885081389549e3be049144f0df7dd89',1,'App::Models::MovieModel']]],
+  ['_24country_8',['$country',['../class_app_1_1_models_1_1_movie_model.html#a40ac1973a558490bc2a8b8669c8abffc',1,'App::Models::MovieModel']]],
+  ['_24date_9',['$date',['../class_app_1_1_models_1_1_movie_model.html#ae1cedd8b604ace7436339b3cb4c4b426',1,'App::Models::MovieModel']]],
+  ['_24enddate_10',['$enddate',['../class_app_1_1_models_1_1_movie_model.html#aa3c3ee8d78cd2a0ded335e2dbd906a2d',1,'App::Models::MovieModel']]],
+  ['_24intjob_11',['$intJob',['../class_app_1_1_models_1_1_person_model.html#a84931bdff0eb245e2b00340942d9f377',1,'App::Models::PersonModel']]],
+  ['_24job_12',['$job',['../class_app_1_1_models_1_1_movie_model.html#a178a3badd9fd8457d762da3896ca6e67',1,'App::Models::MovieModel']]],
+  ['_24order_13',['$order',['../class_app_1_1_models_1_1_movie_model.html#ac87fb203c6658465c79a765167c22b31',1,'App::Models::MovieModel']]],
+  ['_24producer_14',['$producer',['../class_app_1_1_models_1_1_movie_model.html#aa3905b6e3ba09557656be7003f91b525',1,'App::Models::MovieModel']]],
+  ['_24realisator_15',['$realisator',['../class_app_1_1_models_1_1_movie_model.html#a3bfba1a6a9891e8ca89f7acd1b1ab2c8',1,'App::Models::MovieModel']]],
+  ['_24startdate_16',['$startdate',['../class_app_1_1_models_1_1_movie_model.html#a638bec183e1c9293cdbc37fa538754d0',1,'App::Models::MovieModel']]],
+  ['_24strsearch_17',['$strSearch',['../class_app_1_1_models_1_1_person_model.html#a4849b5612e9cfcc66d26243a4249de2f',1,'App::Models::PersonModel']]]
+];
