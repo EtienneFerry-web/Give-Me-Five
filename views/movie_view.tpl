@@ -11,7 +11,11 @@
 <section class="container-xxl row mx-auto" id="movie">
     <div class="col-12 col-md-4 py-1 py-md-5 text-center my-auto">
         <h1 class="d-block d-md-none">{$objMovie->getTitle()}</h1>
-        <img src="{$smarty.env.BASE_URL}assets/img/movie/{$objMovie->getPhoto()}" alt="" class="img-fluid w-75 w-md-50">
+        {if $objMovie->getPhoto()|substr:0:4 == 'http'}
+            <img src="{$objMovie->getPhoto()}" alt="" class="img-fluid w-75 w-md-50">
+        {else}
+            <img src="{$smarty.env.BASE_URL}assets/img/movie/{$objMovie->getPhoto()}" alt="" class="img-fluid w-75 w-md-50">
+        {/if}
         <div class="py-3 text-center w-75 w-md-50 mx-auto">
             <span class="pageMovieNote spanMovie" data-note="{$objMovie->getRating()}">
                 <span class="stars d-inline-block"></span>

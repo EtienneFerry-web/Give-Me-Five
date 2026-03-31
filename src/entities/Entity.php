@@ -2,7 +2,7 @@
     namespace App\Entities;
 	class Entity {
 
-		protected ?int $_id = null;
+		protected $_id = null;
 		protected string $_prefixe = '';
 
 		/**
@@ -23,19 +23,19 @@
 
 		/**
         * Getting the identifier
-        * @return int the entity ID
+        * @return mixed the entity ID
         */
 
-		public function getId():?int{
+		public function getId(){
 			return $this->_id;
 		}
 
 		/**
         * Updating the identifier
-        * @param int $intId the new ID
+        * @param mixed $intId the new ID
         */
 	
-		public function setId(?int $intId){
+		public function setId($intId){
 			$this->_id = $intId;
 		}
 

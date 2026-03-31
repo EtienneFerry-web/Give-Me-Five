@@ -3,6 +3,7 @@
 
     // Modèles
     use App\Models\MovieModel;
+    use App\Models\RapidMovieModel;
     use App\Models\CommentModel;
     use App\Models\PersonModel;
     // Entités
@@ -12,6 +13,7 @@
     use App\Entities\PersonEntity;
 
 	use DateTime;
+	use Exception;
     /**
      * 27/02/2026
      * Version 1
@@ -27,7 +29,7 @@
 
         public function home(){
 
-            $objContentModel 	= new MovieModel;
+            $objContentModel 	= new RapidMovieModel;
 			$arrMovie		    = $objContentModel->newMovie();
 
 			$arrMovieToDisplay	= array();
@@ -51,99 +53,42 @@
         */
 
         public function list(){
-            $objContentModel 	= new MovieModel;
 
-            $objContentModel->producer  	= $_GET['producer']??"";
-            $objContentModel->actor 	    = $_GET['actor']??"";
-            $objContentModel->realisator 	= $_GET['realisator']??"";
-            $objContentModel->categories  	= $_GET['categories']??"";
-            $objContentModel->country     	= $_GET['country']??"";
-            $objContentModel->date 			= $_GET['date']??"";
-            $objContentModel->startdate  	= $_GET['startdate']??"";
-            $objContentModel->enddate 	    = $_GET['enddate']??"";
+            // -------------------------------------------------------
+            // Migration BDD → API : on n'utilise PLUS MovieModel ici.
+            // Toutes les données viennent exclusivement de RapidMovieModel.
+            // -------------------------------------------------------
+            $objRapidModel = new RapidMovieModel;
+            $arrError      = [];
 
-            $objPersonModel 	   = new PersonModel;
-            $arrActor              = $objPersonModel->findActor();
-            $arrReal               = $objPersonModel->findReal();
-            $arrProducer           = $objPersonModel->findProducer();
+            // Recherche par titre si le paramètre GET 'search' est fourni
+            $strSearch = trim($_GET['search'] ?? '');
 
-            $arrActorToDisplay = array();
-
-            foreach($arrActor as $arrDetActor){
-				$objContent = new PersonEntity('pers_');
-				$objContent->hydrate($arrDetActor);
-
-				$arrActorToDisplay[]	= $objContent;
-			}
+            if (!empty($strSearch)) {
+                $arrRawMovies = $objRapidModel->searchMovieByTitle($strSearch);
+            } else {
+                $arrRawMovies = $objRapidModel->newMovie();
+            }
 
 
-			$arrRealToDisplay	= array();
+            // Vérification d'une erreur retournée par le modèle
+            if (isset($arrRawMovies['error'])) {
+                $arrError[]   = "L'API est temporairement indisponible : " . $arrRawMovies['error'];
+                $arrRawMovies = [];
+            }
 
-			foreach($arrReal as $arrDetReal){
-				$objContent = new PersonEntity('pers_');
-				$objContent->hydrate($arrDetReal);
+            // Hydratation dans des MovieEntity (les getters sont utilisés par la vue)
+            $arrMovieToDisplay = [];
 
-				$arrRealToDisplay[]	= $objContent;
-			}
+            foreach ($arrRawMovies as $arrDetMovie) {
+                $objContent = new MovieEntity('mov_');
+                $objContent->hydrate($arrDetMovie);
+                $arrMovieToDisplay[] = $objContent;
+            }
 
-			$arrProducerToDisplay	= array();
-
-			foreach($arrProducer as $arrDetProducer){
-				$objContent = new PersonEntity('pers_');
-				$objContent->hydrate($arrDetProducer);
-
-				$arrProducerToDisplay[]	= $objContent;
-			}
-
-
-			$arrMovie		    = $objContentModel->allMovie();
-			$arrCountry         = $objContentModel->allCountry();
-			$arrCategories      = $objContentModel->allCategories();
-
-
-			$arrCategoriesToDisplay = array();
-
-			foreach($arrCategories as $arrDetCategories){
-				$objContent = new MovieEntity('mov_');
-				$objContent->hydrate($arrDetCategories);
-
-				$arrCategoriesToDisplay[]	= $objContent;
-			}
-
-			$arrCountryToDisplay = array();
-
-			foreach($arrCountry as $arrDetCountry){
-				$objContent = new MovieEntity('mov_');
-				$objContent->hydrate($arrDetCountry);
-
-				$arrCountryToDisplay[]	= $objContent;
-			}
-
-
-			$arrMovieToDisplay = array();
-
-			foreach($arrMovie as $arrDetMovie){
-				$objContent = new MovieEntity('mov_');
-				$objContent->hydrate($arrDetMovie);
-
-				$arrMovieToDisplay[]	= $objContent;
-			}
-
-			$this->_arrData['producer'] 	= $objContentModel->producer;
-			$this->_arrData['actor'] 		= $objContentModel->actor;
-			$this->_arrData['realisator']   = $objContentModel->realisator;
-			$this->_arrData['categories']   = $objContentModel->categories;
-			$this->_arrData['country'] 	    = $objContentModel->country;
-			$this->_arrData['date'] 		= $objContentModel->date;
-			$this->_arrData['startDate'] 	= $objContentModel->startdate;
-			$this->_arrData['endDate'] 	    = $objContentModel->enddate;
-
-			$this->_arrData['arrActorToDisplay'] 		= $arrActorToDisplay;
-			$this->_arrData['arrRealToDisplay'] 		= $arrRealToDisplay;
-			$this->_arrData['arrProducerToDisplay'] 	= $arrProducerToDisplay;
-			$this->_arrData['arrCategoriesToDisplay'] 	= $arrCategoriesToDisplay;
-			$this->_arrData['arrCountryToDisplay'] 		= $arrCountryToDisplay;
-			$this->_arrData['arrMovieToDisplay'] 		= $arrMovieToDisplay;
+            $this->_arrData['strSearch']        = $strSearch;
+            $this->_arrData['arrError']          = $arrError;
+            $this->_arrData['arrMovieToDisplay'] = $arrMovieToDisplay;
 
             $this->_display("list");
         }
@@ -458,9 +403,16 @@
             }
 
             $objMovieModel 	= new MovieModel;
+            $objRapidModel 	= new RapidMovieModel;
 
 			$arrMovie = $objMovieModel->findMovie($_GET['id'], $_SESSION['user']['user_id']??0);
-			$arrMovieImages = $objMovieModel->selectImageMovie($_GET['id']);
+			
+            if(!$arrMovie){
+                $arrMovie = $objRapidModel->getMovieById($_GET['id']);
+                $arrMovieImages = []; // No extra images for API items for now
+            } else {
+                $arrMovieImages = $objMovieModel->selectImageMovie($_GET['id']);
+            }
 
 			if(!$arrMovie){
 				$this->_redirect("error/err404");

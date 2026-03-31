@@ -14,7 +14,7 @@ RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 
 # ctrl/action/id
-RewriteRule ^([^/]+)/([^/]+)/([0-9]+)/?$ index.php?ctrl=$1&action=$2&id=$3 [QSA,L]
+RewriteRule ^([^/]+)/([^/]+)/(.+)/?$ index.php?ctrl=$1&action=$2&id=$3 [QSA,L]
 
 # Ne pas réécrire si c'est un vrai fichier ou répertoire
 RewriteCond %{REQUEST_FILENAME} !-f
