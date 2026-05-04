@@ -52,8 +52,52 @@
             return $this->_db->query($strRq)->fetchAll();
         }
 
+        public function topRatedMovie(int $limit = 20): array {
+            $strRq = "
+                SELECT mov_id, mov_title, mov_description, mov_release_date,
+                       pho_photo AS 'mov_photo',
+                       COALESCE(AVG(ratings.rat_score), 0) AS 'mov_rating',
+                       COUNT(DISTINCT lik_user_id) AS 'mov_like'
+                FROM movies
+                LEFT JOIN photos ON movies.mov_id = photos.pho_mov_id AND photos.pho_type = 'Affiche'
+                LEFT JOIN ratings ON movies.mov_id = ratings.rat_mov_id
+                LEFT JOIN liked ON movies.mov_id = liked.lik_mov_id AND liked.lik_com_id IS NULL
+                WHERE mov_published_at IS NOT NULL AND mov_release_date <= CURDATE()
+                GROUP BY movies.mov_id, pho_photo
+                HAVING mov_rating > 0
+                ORDER BY mov_rating DESC
+                LIMIT :limit
+            ";
+            $objRq = $this->_db->prepare($strRq);
+            $objRq->bindValue(':limit', $limit, \PDO::PARAM_INT);
+            $objRq->execute();
+            return $objRq->fetchAll();
+        }
+
+        public function mostLikedMovie(int $limit = 20): array {
+            $strRq = "
+                SELECT mov_id, mov_title, mov_description, mov_release_date,
+                       pho_photo AS 'mov_photo',
+                       COALESCE(AVG(ratings.rat_score), 0) AS 'mov_rating',
+                       COUNT(DISTINCT lik_user_id) AS 'mov_like'
+                FROM movies
+                LEFT JOIN photos ON movies.mov_id = photos.pho_mov_id AND photos.pho_type = 'Affiche'
+                LEFT JOIN ratings ON movies.mov_id = ratings.rat_mov_id
+                LEFT JOIN liked ON movies.mov_id = liked.lik_mov_id AND liked.lik_com_id IS NULL
+                WHERE mov_published_at IS NOT NULL AND mov_release_date <= CURDATE()
+                GROUP BY movies.mov_id, pho_photo
+                HAVING mov_like > 0
+                ORDER BY mov_like DESC
+                LIMIT :limit
+            ";
+            $objRq = $this->_db->prepare($strRq);
+            $objRq->bindValue(':limit', $limit, \PDO::PARAM_INT);
+            $objRq->execute();
+            return $objRq->fetchAll();
+        }
+
         /**
-        * @author Marco 
+        * @author Marco
         * Dynamic filtering and retrieval of all movies
         * @return array a filtered collection of movies with ratings, likes, and posters
         */

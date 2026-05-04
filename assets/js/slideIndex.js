@@ -11,26 +11,28 @@
  */
 
 document.addEventListener('DOMContentLoaded', function () {
-  new Splide('.splide', {
-    type: 'loop',
-    drag: 'free',
-    focus: false,
-    perPage: 6,
-    gap: '2px',
-    pagination: false,
-    arrows: false,
-    autoWidth: true,
-    autoHeight: false,
-    preloadPages: 3,
-    clones: 10,
-    lazyLoad: false,
-    updateOnMove: true,
-    breakpoints: {
-      1024: { perPage: 4, gap: '0.5rem' },
-      768:  { perPage: 2, gap: '0.5rem' },
-    },
-    autoScroll: { speed: 2 },
-  }).mount(window.splide.Extensions);
+  document.querySelectorAll('.splide').forEach(function (el) {
+    new Splide(el, {
+      type: 'loop',
+      drag: 'free',
+      focus: false,
+      perPage: 6,
+      gap: '2px',
+      pagination: false,
+      arrows: false,
+      autoWidth: true,
+      autoHeight: false,
+      preloadPages: 3,
+      clones: 10,
+      lazyLoad: false,
+      updateOnMove: true,
+      breakpoints: {
+        1024: { perPage: 4, gap: '0.5rem' },
+        768:  { perPage: 2, gap: '0.5rem' },
+      },
+      autoScroll: { speed: 2 },
+    }).mount(window.splide.Extensions);
+  });
 });
 
 

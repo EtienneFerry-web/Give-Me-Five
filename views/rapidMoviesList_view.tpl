@@ -54,6 +54,18 @@
 
                         <hr class="my-3">
 
+                        {* Type *}
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small text-uppercase text-muted">Type</label>
+                            <select name="show_type" class="form-select form-select-sm">
+                                {foreach from=$arrShowTypes key=val item=label}
+                                    <option value="{$val}" {if $activeShowType == $val}selected{/if}>
+                                        {$label}
+                                    </option>
+                                {/foreach}
+                            </select>
+                        </div>
+
                         {* Genre *}
                         <div class="mb-3">
                             <label class="form-label fw-semibold small text-uppercase text-muted">Genre</label>
@@ -122,23 +134,23 @@
                         {* Note minimale *}
                         <div class="mb-4">
                             <label class="form-label fw-semibold small text-uppercase text-muted">
-                                Note minimale : <span id="ratingDisplay">{if $activeRatingMin}{$activeRatingMin}{else}0{/if}</span>/100
+                                Note minimale : <span id="ratingDisplay">{if $activeRatingMin}{$activeRatingMin}{else}0{/if}</span>/5
                             </label>
                             <input
                                 type="range"
                                 name="rating_min"
                                 class="form-range"
                                 min="0"
-                                max="100"
-                                step="5"
+                                max="5"
+                                step="0.5"
                                 value="{if $activeRatingMin}{$activeRatingMin}{else}0{/if}"
                                 id="ratingRange"
                                 oninput="document.getElementById('ratingDisplay').textContent = this.value"
                             >
                             <div class="d-flex justify-content-between">
                                 <small class="text-muted">0</small>
-                                <small class="text-muted">50</small>
-                                <small class="text-muted">100</small>
+                                <small class="text-muted">2.5</small>
+                                <small class="text-muted">5</small>
                             </div>
                         </div>
 
@@ -165,6 +177,11 @@
                     {if $searchedTitle != ''}
                         <span class="badge bg-primary rounded-pill px-3 py-2">
                             <i class="bi bi-search me-1"></i>{$searchedTitle|escape:'html'}
+                        </span>
+                    {/if}
+                    {if $activeShowType != ''}
+                        <span class="badge bg-dark rounded-pill px-3 py-2">
+                            <i class="bi bi-collection-play me-1"></i>{$arrShowTypes[$activeShowType]|escape:'html'}
                         </span>
                     {/if}
                     {if $activeGenre != ''}
@@ -334,4 +351,79 @@
     .movie-poster-wrap { height: 220px; }
 }
 </style>
+{/block}
+
+{block name="js"}
+<script>
+{literal}
+(function () {
+    const titleInput = document.querySelector('input[name="title"]');
+    const grid       = document.getElementById('moviesGrid');
+    const countEl    = document.querySelector('.text-muted.small.mb-3');
+    if (!titleInput || !grid) return;
+
+    let timer;
+
+    function buildCard(m) {
+        const photo = m.photo
+            ? `<img src="${m.photo}" alt="${escHtml(m.title)}" class="card-img-top movie-poster" loading="lazy">`
+            : `<div class="movie-poster-placeholder d-flex align-items-center justify-content-center bg-dark text-white"><i class="bi bi-film fs-1 opacity-25"></i></div>`;
+
+        const badge = m.rating > 0
+            ? `<span class="position-absolute top-0 end-0 m-2 badge bg-warning text-dark rounded-pill shadow-sm"><i class="bi bi-star-fill me-1"></i>${parseFloat(m.rating).toFixed(1)}/5</span>`
+            : '';
+
+        const date = m.release
+            ? `<small class="text-muted mb-2"><i class="bi bi-calendar3 me-1"></i>${m.release}</small>` : '';
+
+        const desc = m.description
+            ? `<p class="card-text text-muted small text-truncate-3 mb-0 flex-grow-1">${escHtml(m.description)}</p>` : '';
+
+        return `<div class="col">
+          <div class="card h-100 border-0 shadow-sm rounded-4 movie-card overflow-hidden">
+            <a href="${url}movie/moviePage/${m.id}" class="d-block position-relative movie-poster-wrap">
+              ${photo}${badge}
+              <div class="movie-overlay d-flex align-items-center justify-content-center">
+                <span class="btn btn-light btn-sm rounded-pill"><i class="bi bi-play-fill me-1"></i>Voir le film</span>
+              </div>
+            </a>
+            <div class="card-body p-3 d-flex flex-column">
+              <h6 class="card-title fw-bold mb-1 text-truncate-2">${escHtml(m.title)}</h6>
+              ${date}${desc}
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function escHtml(str) {
+        return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    async function liveSearch(title) {
+        try {
+            const res  = await fetch(`${url}rapidMovie/search?ajax=1&title=${encodeURIComponent(title)}`);
+            const data = await res.json();
+            if (data.movies.length === 0) {
+                grid.innerHTML = '<div class="col-12 text-center py-5"><i class="bi bi-search fs-1 text-muted opacity-25 d-block mb-3"></i><h4 class="fw-bold">Aucun film trouvé</h4></div>';
+            } else {
+                grid.innerHTML = data.movies.map(buildCard).join('');
+            }
+            if (countEl) {
+                countEl.innerHTML = `<strong>${data.count}</strong> film${data.count > 1 ? 's' : ''} trouvé${data.count > 1 ? 's' : ''}`;
+            }
+        } catch (e) {
+            console.error('AJAX search error:', e);
+        }
+    }
+
+    titleInput.addEventListener('input', function () {
+        clearTimeout(timer);
+        const val = this.value.trim();
+        if (val.length === 0 || val.length >= 2) {
+            timer = setTimeout(() => liveSearch(val), 350);
+        }
+    });
+})();
+{/literal}
+</script>
 {/block}

@@ -95,7 +95,6 @@ class RapidMovieModel extends Connect
     {
         $data = $this->callApi("shows/search/filters", [
             "country"         => "fr",
-            "show_type"       => "movie",
             "order_by"        => "popularity_alltime",
             "desc"            => "true",
             "year_min"        => date("Y") - 2,
@@ -109,14 +108,16 @@ class RapidMovieModel extends Connect
     /**
      * Search movies by title.
      */
-    public function searchMovieByTitle(string $title): array
+    public function searchMovieByTitle(string $title, string $showType = ''): array
     {
-        $data = $this->callApi("shows/search/title", [
-            "country" => "fr",
-            "title" => $title,
-            "show_type" => "movie",
+        $params = [
+            "country"         => "fr",
+            "title"           => $title,
             "output_language" => "fr"
-        ]);
+        ];
+        if ($showType !== '') $params['show_type'] = $showType;
+
+        $data = $this->callApi("shows/search/title", $params);
 
         $results = $data['result'] ?? $data['shows'] ?? $data; // search/title sometimes returns the array directly
         if (isset($results['id'])) return [$this->mapToShow($results)]; // Single result check
@@ -130,11 +131,12 @@ class RapidMovieModel extends Connect
      */
     public function searchByFilters(array $filters = []): array
     {
+        $showType = $filters['show_type'] ?? '';
         $params = [
             "country"         => $filters['country'] ?? 'fr',
-            "show_type"       => "movie",
             "output_language" => "fr",
         ];
+        if ($showType !== '') $params['show_type'] = $showType;
 
         if (!empty($filters['genres'])) {
             $params['genres'] = $filters['genres'];
@@ -163,6 +165,36 @@ class RapidMovieModel extends Connect
         $data    = $this->callApi("shows/search/filters", $params);
         $results = $data['shows'] ?? $data['result'] ?? [];
 
+        return array_map([$this, 'mapToShow'], $results);
+    }
+
+    /**
+     * Fetch top-rated movies.
+     */
+    public function topRatedMovie(): array
+    {
+        $data = $this->callApi("shows/search/filters", [
+            "country"         => "fr",
+            "order_by"        => "rating",
+            "output_language" => "fr"
+        ]);
+
+        $results = $data['shows'] ?? $data['result'] ?? [];
+        return array_map([$this, 'mapToShow'], $results);
+    }
+
+    /**
+     * Fetch most popular movies (all-time popularity as proxy for likes).
+     */
+    public function mostPopularMovie(): array
+    {
+        $data = $this->callApi("shows/search/filters", [
+            "country"         => "fr",
+            "order_by"        => "popularity_alltime",
+            "output_language" => "fr"
+        ]);
+
+        $results = $data['shows'] ?? $data['result'] ?? [];
         return array_map([$this, 'mapToShow'], $results);
     }
 

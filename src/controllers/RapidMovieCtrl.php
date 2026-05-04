@@ -44,6 +44,13 @@ class RapidMovieCtrl extends MotherCtrl {
         'au' => '🇦🇺 Australie',
     ];
 
+    private const SHOW_TYPES = [
+        ''             => 'Tous',
+        'movie'        => 'Film',
+        'series'       => 'Série',
+        'documentary'  => 'Documentaire',
+    ];
+
     private const SORT_OPTIONS = [
         'popularity'    => 'Popularité (tous temps)',
         'popularity_1y' => 'Popularité (1 an)',
@@ -59,22 +66,24 @@ class RapidMovieCtrl extends MotherCtrl {
     {
         $objModel = new RapidMovieModel();
 
-        $strTitle  = trim($_GET['title']    ?? '');
-        $strGenre  = trim($_GET['genre']    ?? '');
+        $strTitle    = trim($_GET['title']     ?? '');
+        $strShowType = trim($_GET['show_type'] ?? '');
+        $strGenre    = trim($_GET['genre']     ?? '');
         $intYearMin = (int)($_GET['year_min'] ?? 0) ?: null;
         $intYearMax = (int)($_GET['year_max'] ?? 0) ?: null;
-        $intRating  = isset($_GET['rating_min']) && $_GET['rating_min'] !== '' ? (int)$_GET['rating_min'] : null;
+        $floatRatingDisplay = isset($_GET['rating_min']) && $_GET['rating_min'] !== '' ? (float)$_GET['rating_min'] : null;
+        $intRating = $floatRatingDisplay !== null ? (int)round($floatRatingDisplay * 20) : null;
         $strOrder  = $_GET['order_by'] ?? 'popularity';
         $strCountry = $_GET['country'] ?? 'fr';
 
         $arrMovies = [];
         $arrError  = [];
 
-        $boolHasFilters = $strGenre !== '' || $intYearMin || $intYearMax || $intRating !== null || $strOrder !== 'popularity' || $strCountry !== 'fr';
+        $boolHasFilters = $strGenre !== '' || $strShowType !== '' || $intYearMin || $intYearMax || $floatRatingDisplay !== null || $strOrder !== 'popularity' || $strCountry !== 'fr';
 
         if ($strTitle !== '') {
             // Recherche par titre via l'endpoint title
-            $raw = $objModel->searchMovieByTitle($strTitle);
+            $raw = $objModel->searchMovieByTitle($strTitle, $strShowType);
 
             if (isset($raw['error'])) {
                 $arrError[] = $raw['error'];
@@ -95,6 +104,7 @@ class RapidMovieCtrl extends MotherCtrl {
             // Recherche par filtres via l'endpoint filters
             $arrFilters = [
                 'country'    => $strCountry,
+                'show_type'  => $strShowType,
                 'genres'     => $strGenre,
                 'year_min'   => $intYearMin,
                 'year_max'   => $intYearMax,
@@ -125,6 +135,8 @@ class RapidMovieCtrl extends MotherCtrl {
         $this->_arrData['arrMovieToDisplay'] = $arrMovieToDisplay;
         $this->_arrData['arrError']          = $arrError;
         $this->_arrData['searchedTitle']     = $strTitle;
+        $this->_arrData['arrShowTypes']      = self::SHOW_TYPES;
+        $this->_arrData['activeShowType']    = $strShowType;
         $this->_arrData['arrGenres']         = self::GENRES;
         $this->_arrData['arrCountries']      = self::COUNTRIES;
         $this->_arrData['arrSortOptions']    = self::SORT_OPTIONS;
@@ -133,8 +145,23 @@ class RapidMovieCtrl extends MotherCtrl {
         $this->_arrData['activeOrder']       = $strOrder;
         $this->_arrData['activeYearMin']     = $intYearMin;
         $this->_arrData['activeYearMax']     = $intYearMax;
-        $this->_arrData['activeRatingMin']   = $intRating;
+        $this->_arrData['activeRatingMin']   = $floatRatingDisplay;
         $this->_arrData['boolHasFilters']    = $boolHasFilters || $strTitle !== '';
+
+        // AJAX mode: return JSON
+        if (!empty($_GET['ajax'])) {
+            header('Content-Type: application/json');
+            $arrJson = array_map(fn($m) => [
+                'id'          => $m->getId(),
+                'title'       => $m->getTitle(),
+                'photo'       => $m->getPhoto(),
+                'rating'      => $m->getRating(),
+                'release'     => $m->getRelease_date(),
+                'description' => $m->getSummary(120),
+            ], $arrMovieToDisplay);
+            echo json_encode(['movies' => $arrJson, 'count' => count($arrJson)]);
+            exit;
+        }
 
         $this->_display("rapidMoviesList");
     }

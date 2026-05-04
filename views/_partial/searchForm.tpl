@@ -1,7 +1,7 @@
 
-<form action="{$smarty.env.BASE_URL}search/searchPage" class="{$formClass}" role="search" method="get" id="formSearch">
+<form action="{$smarty.env.BASE_URL}rapidMovie/search" class="{$formClass}" role="search" method="get" id="formSearch">
     <div class="search-container">
-        <input class="form-control me-2" type="search" placeholder="Rechercher..." name="search" value="{if isset($arrSearch)} {$arrSearch->getSearch()} {/if}" id="searchBar" autocomplete="off">
+        <input class="form-control me-2" type="search" placeholder="Rechercher..." name="title" value="" id="searchBar" autocomplete="off">
         <div id="suggestions" class="suggestions-list"></div>
     </div>
     <button class="btn" type="submit">

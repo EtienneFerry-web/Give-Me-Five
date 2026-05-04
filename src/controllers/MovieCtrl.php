@@ -29,22 +29,41 @@
 
         public function home(){
 
-            $objContentModel 	= new RapidMovieModel;
-            $objMovieModel      = new MovieModel;
-			$arrMovie		    = $objContentModel->newMovie();
+            $objContentModel = new RapidMovieModel;
+            $objMovieModel   = new MovieModel;
 
-			$arrMovieToDisplay	= array();
+            // Nouveautés : API
+            $fnHydrateApi = function(array $arrMovies) use ($objMovieModel): array {
+                $arr = [];
+                foreach ($arrMovies as $arrDetMovie) {
+                    $arrDetMovie['mov_id'] = $objMovieModel->findOrCreateApiMovie($arrDetMovie);
+                    $objContent = new MovieEntity('mov_');
+                    $objContent->hydrate($arrDetMovie);
+                    $arr[] = $objContent;
+                }
+                return $arr;
+            };
 
-			foreach($arrMovie as $arrDetMovie){
-                // Enregistre le film en BDD si nécessaire → ID entier local
-                $arrDetMovie['mov_id'] = $objMovieModel->findOrCreateApiMovie($arrDetMovie);
-				$objContent = new MovieEntity('mov_');
-				$objContent->hydrate($arrDetMovie);
+            // Mieux notés / Plus aimés : BDD locale
+            $fnHydrateDb = function(array $arrRows): array {
+                $arr = [];
+                foreach ($arrRows as $arrRow) {
+                    $objContent = new MovieEntity('mov_');
+                    $objContent->hydrate($arrRow);
+                    $arr[] = $objContent;
+                }
+                return $arr;
+            };
 
-				$arrMovieToDisplay[]	= $objContent;
-			}
+            $this->_arrData['arrMovieToDisplay']       = $fnHydrateApi($objContentModel->newMovie());
+            $this->_arrData['arrMostPopularToDisplay'] = $fnHydrateDb($objMovieModel->mostLikedMovie());
 
-			$this->_arrData['arrMovieToDisplay'] = $arrMovieToDisplay;
+            // Mieux notés : fusion API + BDD triée par note décroissante
+            $arrTopRatedApi = $fnHydrateApi($objContentModel->topRatedMovie());
+            $arrTopRatedDb  = $fnHydrateDb($objMovieModel->topRatedMovie());
+            $arrTopRated    = array_merge($arrTopRatedApi, $arrTopRatedDb);
+            usort($arrTopRated, fn($a, $b) => $b->getRating() <=> $a->getRating());
+            $this->_arrData['arrTopRatedToDisplay'] = $arrTopRated;
 
             $this->_display("home");
         }
