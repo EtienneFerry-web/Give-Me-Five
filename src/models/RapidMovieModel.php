@@ -103,6 +103,48 @@ class RapidMovieModel extends Connect
     }
 
     /**
+     * Search movies using the filters endpoint (genre, year, rating, sort).
+     * Falls back to newMovie() if no filters are active.
+     */
+    public function searchByFilters(array $filters = []): array
+    {
+        $params = [
+            "country"         => $filters['country'] ?? 'fr',
+            "show_type"       => "movie",
+            "output_language" => "fr",
+        ];
+
+        if (!empty($filters['genres'])) {
+            $params['genres'] = $filters['genres'];
+        }
+        if (!empty($filters['year_min'])) {
+            $params['year_min'] = (int)$filters['year_min'];
+        }
+        if (!empty($filters['year_max'])) {
+            $params['year_max'] = (int)$filters['year_max'];
+        }
+        if (isset($filters['rating_min']) && $filters['rating_min'] !== '') {
+            $params['rating_min'] = (int)$filters['rating_min'];
+        }
+
+        $orderMap = [
+            'popularity'    => 'popularity_alltime',
+            'popularity_1y' => 'popularity_1year',
+            'rating'        => 'rating',
+            'year_desc'     => 'year',
+        ];
+        $params['order_by'] = $orderMap[$filters['order_by'] ?? ''] ?? 'popularity_alltime';
+        if (($filters['order_by'] ?? '') === 'year_desc') {
+            $params['desc'] = 'true';
+        }
+
+        $data    = $this->callApi("shows/search/filters", $params);
+        $results = $data['shows'] ?? $data['result'] ?? [];
+
+        return array_map([$this, 'mapToShow'], $results);
+    }
+
+    /**
      * Get a single movie by ID.
      */
     public function getMovieById(string $id): array|bool
