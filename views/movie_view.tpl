@@ -30,6 +30,11 @@
     <div class="mb-3">
         {if $objMovie->getLength()}
             <span class="spanMovie d-block py-1"><strong>Durée :</strong> {$objMovie->getLength()}</span>
+        {elseif isset($arrApiData.runtime) && $arrApiData.runtime > 0}
+            <span class="spanMovie d-block py-1"><strong>Durée :</strong>
+                {math equation="floor(r/60)" r=$arrApiData.runtime}h
+                {math equation="r mod 60" r=$arrApiData.runtime} min
+            </span>
         {/if}
         {if $objMovie->getRelease_date()}
             <span class="spanMovie d-block py-1"><strong>Date de sortie :</strong> {$objMovie->getDateFormat()}</span>
@@ -37,9 +42,63 @@
         {if $objMovie->getCountry()}
             <span class="spanMovie d-block py-1"><strong>Pays :</strong> {$objMovie->getCountry()}</span>
         {/if}
+
+        {* Genres (données API) *}
+        {if isset($arrApiData.genres) && $arrApiData.genres|@count > 0}
+            <div class="py-1 d-flex flex-wrap gap-2 align-items-center justify-content-center justify-content-md-start">
+                {foreach from=$arrApiData.genres item=genre}
+                    <span class="badge rounded-pill" style="background:#111;color:#fff;font-weight:500;padding:.4em .9em;">
+                        {$genre.name|escape:'html'}
+                    </span>
+                {/foreach}
+            </div>
+        {/if}
     </div>
 
     <p class="px-2 px-md-0 mb-4">{$objMovie->getDescription()}</p>
+
+    {* ── Bloc données API enrichies ── *}
+    {if isset($arrApiData)}
+
+        {* Réalisateurs *}
+        {if isset($arrApiData.directors) && $arrApiData.directors|@count > 0}
+        <div class="mb-3">
+            <strong class="spanMovie">Réalisateur{if $arrApiData.directors|@count > 1}s{/if} :</strong>
+            <span class="text-muted ms-1">{$arrApiData.directors|@implode:', '|escape:'html'}</span>
+        </div>
+        {/if}
+
+        {* Streaming — où voir ce film *}
+        {if isset($arrApiData.streamingOptions) && isset($arrApiData.streamingOptions.fr) && $arrApiData.streamingOptions.fr|@count > 0}
+        <div class="mb-4">
+            <strong class="spanMovie d-block mb-2">Disponible sur :</strong>
+            <div class="d-flex flex-wrap gap-2">
+                {foreach from=$arrApiData.streamingOptions.fr item=option}
+                    {if isset($option.service.name)}
+                    <a href="{$option.link|default:'#'|escape:'html'}" target="_blank" rel="noopener"
+                       class="streaming-badge d-flex align-items-center gap-2 text-decoration-none rounded-3 border px-3 py-2 shadow-sm bg-white"
+                       title="{$option.service.name|escape:'html'} — {$option.type|capitalize|escape:'html'}">
+                        {if isset($option.service.imageSet.lightThemeImage)}
+                            <img src="{$option.service.imageSet.lightThemeImage}" alt="{$option.service.name}" style="height:22px;object-fit:contain;">
+                        {else}
+                            <i class="bi bi-play-circle-fill text-primary fs-5"></i>
+                        {/if}
+                        <span class="fw-semibold small text-dark">{$option.service.name|escape:'html'}</span>
+                        <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill small ms-1">
+                            {if $option.type == 'subscription'}Inclus
+                            {elseif $option.type == 'rent'}Location
+                            {elseif $option.type == 'buy'}Achat
+                            {elseif $option.type == 'free'}Gratuit
+                            {else}{$option.type|capitalize}{/if}
+                        </span>
+                    </a>
+                    {/if}
+                {/foreach}
+            </div>
+        </div>
+        {/if}
+
+    {/if}
 
     <div class="py-3 py-md-4">
         <h3 class="mb-3">Casting</h3>
@@ -51,7 +110,17 @@
                     </a>
                 </div>
             {foreachelse}
-                <p class="text-muted py-3 m-0">Nous n'avons pas le casting de ce film !</p>
+                {* Cast API si pas de casting local *}
+                {if isset($arrApiData.cast) && $arrApiData.cast|@count > 0}
+                    {foreach from=$arrApiData.cast item=actor name=castLoop}
+                        {if $smarty.foreach.castLoop.index >= 8}{break}{/if}
+                        <div class="col-6 col-sm-4 col-md-3">
+                            <span class="spanMovie d-block text-truncate">{$actor|escape:'html'}</span>
+                        </div>
+                    {/foreach}
+                {else}
+                    <p class="text-muted py-3 m-0">Nous n'avons pas le casting de ce film !</p>
+                {/if}
             {/foreach}
         </div>
     </div>
@@ -236,6 +305,18 @@
     </section>
 
 {/if}
+{/block}
+
+{block name="css_variation" append}
+<style>
+.streaming-badge {
+    transition: transform .2s, box-shadow .2s;
+}
+.streaming-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0,0,0,.12) !important;
+}
+</style>
 {/block}
 
 {block name="js"}

@@ -41,27 +41,31 @@ class RapidMovieModel extends Connect
         }
 
         $decoded = json_decode($response, true);
-        
-        // Log the response for debugging (remove this once fixed)
-        error_log("RapidMovieModel API Response: " . substr($response, 0, 500));
 
         return $decoded ?: [];
     }
 
     /**
      * Maps an API show object to the local MovieEntity structure.
+     * Also embeds the full raw JSON so it can be persisted in mov_api_data.
      */
     private function mapToShow(array $item): array
     {
         $year        = $item['releaseYear'] ?? '';
         $releaseDate = $year ? $year . '-01-01' : '';
 
-        $ytId        = $item['youtubeTrailerVideoId'] ?? '';
-        $trailerUrl  = $ytId ? 'https://www.youtube.com/watch?v=' . $ytId : '';
+        $ytId       = $item['youtubeTrailerVideoId'] ?? '';
+        $trailerUrl = $ytId ? 'https://www.youtube.com/watch?v=' . $ytId : '';
 
         $photo = $item['imageSet']['verticalPoster']['w480']
               ?? $item['imageSet']['verticalPoster']['w240']
               ?? '';
+
+        // Runtime (minutes) → TIME string for the DB  e.g. 148 → "02:28:00"
+        $runtime    = (int)($item['runtime'] ?? 0);
+        $timeString = $runtime > 0
+            ? sprintf('%02d:%02d:00', intdiv($runtime, 60), $runtime % 60)
+            : '00:00:00';
 
         return [
             'mov_api_id'      => $item['id'] ?? '',
@@ -72,13 +76,15 @@ class RapidMovieModel extends Connect
             'mov_rating'      => (float)(($item['rating'] ?? 0) / 10),
             'mov_release_date'=> $releaseDate,
             'mov_trailer_url' => $trailerUrl,
+            'mov_length'      => $timeString,
             'mov_like'        => 0,
             'mov_reported'    => 0,
             'mov_user_liked'  => 0,
             'mov_note_user'   => null,
             'mov_country'     => '',
-            'mov_length'      => '',
             'is_api'          => true,
+            // JSON brut conservé pour l'affichage riche dans movie_view
+            'mov_api_json'    => json_encode($item, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
         ];
     }
 

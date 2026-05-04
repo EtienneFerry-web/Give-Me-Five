@@ -476,11 +476,18 @@
 
 			
 
+			// Données riches de l'API (genres, streaming, cast, réalisateurs…)
+			$arrApiData = null;
+			if (!empty($arrMovie['mov_api_data'])) {
+				$arrApiData = json_decode($arrMovie['mov_api_data'], true);
+			}
+
 			$this->_arrData['arrError'] = $arrError;
 			$this->_arrData['arrCommentToDisplay'] = $arrCommentToDisplay;
 			$this->_arrData['arrPersToDisplay'] = $arrPersToDisplay;
 			$this->_arrData['arrImagesToDisplay'] = $arrImagesToDisplay;
 			$this->_arrData['objMovie'] = $objMovie;
+			$this->_arrData['arrApiData'] = $arrApiData;
 
             $this->_display("movie");
         }

@@ -168,13 +168,12 @@
 
         /**
          * Finds a movie by its external API ID.
-         * @param string $apiId The API identifier (e.g. "tt1234567").
-         * @return array|bool Movie row or false.
+         * Returns the full row (including mov_api_data) so we can check if JSON needs updating.
          */
         public function findMovieByApiId(string $apiId): array|bool
         {
             $stmt = $this->_db->prepare(
-                "SELECT mov_id FROM movies WHERE mov_api_id = :apiId LIMIT 1"
+                "SELECT mov_id, mov_api_data FROM movies WHERE mov_api_id = :apiId LIMIT 1"
             );
             $stmt->bindValue(':apiId', $apiId, PDO::PARAM_STR);
             $stmt->execute();
@@ -183,42 +182,58 @@
 
         /**
          * Inserts an API movie into the local DB (if not already present) and returns its local integer ID.
-         * This allows all existing features (comments, likes, reports) to work on API movies.
+         * Also persists the full raw API JSON so movie_view can display rich metadata.
          * @param array $apiData Data from RapidMovieModel::mapToShow().
          * @return int Local integer movie ID.
          */
         public function findOrCreateApiMovie(array $apiData): int
         {
-            $apiId = $apiData['mov_api_id'] ?? '';
+            $apiId   = $apiData['mov_api_id'] ?? '';
+            $apiJson = $apiData['mov_api_json'] ?? null;
 
             // Already registered?
             $existing = $this->findMovieByApiId($apiId);
             if ($existing) {
+                // Update JSON if it wasn't stored yet
+                if (empty($existing['mov_api_data']) && $apiJson) {
+                    $upd = $this->_db->prepare(
+                        "UPDATE movies SET mov_api_data = :json WHERE mov_id = :id"
+                    );
+                    $upd->bindValue(':json', $apiJson, PDO::PARAM_STR);
+                    $upd->bindValue(':id',   (int)$existing['mov_id'], PDO::PARAM_INT);
+                    $upd->execute();
+                }
                 return (int)$existing['mov_id'];
             }
 
             $releaseDate = $apiData['mov_release_date'] ?: date('Y') . '-01-01';
-            $photo       = $apiData['mov_photo'] ?? '';
+            $photo       = $apiData['mov_photo']       ?? '';
             $trailer     = $apiData['mov_trailer_url'] ?? '';
+            $length      = $apiData['mov_length']      ?: '00:00:00';
+            $title       = $apiData['mov_title']       ?? '';
+            $desc        = $apiData['mov_description'] ?? '';
 
-            // Insert minimal movie record
             $stmt = $this->_db->prepare(
                 "INSERT INTO movies
-                    (mov_api_id, mov_title, mov_original_title, mov_description,
+                    (mov_api_id, mov_api_data, mov_title, mov_original_title, mov_description,
                      mov_release_date, mov_length, mov_trailer_url, mov_published_at)
                  VALUES
-                    (:apiId, :title, :title, :desc, :releaseDate, '00:00:00', :trailer, NOW())"
+                    (:apiId, :apiJson, :title, :titleOrig, :desc,
+                     :releaseDate, :length, :trailer, NOW())"
             );
-            $stmt->bindValue(':apiId',       $apiId,                     PDO::PARAM_STR);
-            $stmt->bindValue(':title',       $apiData['mov_title'] ?? '', PDO::PARAM_STR);
-            $stmt->bindValue(':desc',        $apiData['mov_description'] ?? '', PDO::PARAM_STR);
-            $stmt->bindValue(':releaseDate', $releaseDate,               PDO::PARAM_STR);
-            $stmt->bindValue(':trailer',     $trailer,                   PDO::PARAM_STR);
+            $stmt->bindValue(':apiId',     $apiId,       PDO::PARAM_STR);
+            $stmt->bindValue(':apiJson',   $apiJson,     PDO::PARAM_STR);
+            $stmt->bindValue(':title',     $title,       PDO::PARAM_STR);
+            $stmt->bindValue(':titleOrig', $title,       PDO::PARAM_STR);
+            $stmt->bindValue(':desc',      $desc,        PDO::PARAM_STR);
+            $stmt->bindValue(':releaseDate',$releaseDate,PDO::PARAM_STR);
+            $stmt->bindValue(':length',    $length,      PDO::PARAM_STR);
+            $stmt->bindValue(':trailer',   $trailer,     PDO::PARAM_STR);
             $stmt->execute();
 
             $localId = (int)$this->_db->lastInsertId();
 
-            // Store the poster URL in the photos table
+            // Stocker le poster dans la table photos
             if ($photo !== '') {
                 $stmtPhoto = $this->_db->prepare(
                     "INSERT IGNORE INTO photos (pho_photo, pho_type, pho_mov_id)
