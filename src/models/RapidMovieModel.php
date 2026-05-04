@@ -73,7 +73,7 @@ class RapidMovieModel extends Connect
             'mov_title'       => $item['title'] ?? '',
             'mov_description' => $item['overview'] ?? '',
             'mov_photo'       => $photo,
-            'mov_rating'      => (float)(($item['rating'] ?? 0) / 10),
+            'mov_rating'      => (float)(($item['rating'] ?? 0) / 20),
             'mov_release_date'=> $releaseDate,
             'mov_trailer_url' => $trailerUrl,
             'mov_length'      => $timeString,

@@ -477,9 +477,22 @@
 			
 
 			// Données riches de l'API (genres, streaming, cast, réalisateurs…)
-			$arrApiData = null;
+			$arrApiData      = null;
+			$strDirectors    = '';
+			$strCast         = '';
 			if (!empty($arrMovie['mov_api_data'])) {
-				$arrApiData = json_decode($arrMovie['mov_api_data'], true);
+				$arrApiData   = json_decode($arrMovie['mov_api_data'], true);
+				$strDirectors = join(', ', $arrApiData['directors'] ?? []);
+				$strCast      = join(', ', array_slice($arrApiData['cast'] ?? [], 0, 8));
+
+				// La colonne pho_photo (VARCHAR 255) tronque les URLs CDN signées.
+				// On écrase la photo directement depuis le JSON, qui lui est stocké en MEDIUMTEXT.
+				$strApiPhoto = $arrApiData['imageSet']['verticalPoster']['w480']
+							?? $arrApiData['imageSet']['verticalPoster']['w240']
+							?? '';
+				if ($strApiPhoto !== '') {
+					$objMovie->setPhoto($strApiPhoto);
+				}
 			}
 
 			$this->_arrData['arrError'] = $arrError;
@@ -488,6 +501,8 @@
 			$this->_arrData['arrImagesToDisplay'] = $arrImagesToDisplay;
 			$this->_arrData['objMovie'] = $objMovie;
 			$this->_arrData['arrApiData'] = $arrApiData;
+			$this->_arrData['strDirectors'] = $strDirectors;
+			$this->_arrData['strCast'] = $strCast;
 
             $this->_display("movie");
         }

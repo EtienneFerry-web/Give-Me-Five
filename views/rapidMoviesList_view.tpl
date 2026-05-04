@@ -15,7 +15,7 @@
                     Explorer les films
                 {/if}
             </h1>
-            <p class="text-muted small mb-0 mt-1">Via l'API Streaming Availability</p>
+            <p class="text-muted small mb-0 mt-1">Catalogue de films</p>
         </div>
         <a href="{$smarty.env.BASE_URL}movie/home" class="btn btn-outline-secondary btn-sm">
             <i class="bi bi-house me-1"></i> Accueil
@@ -225,10 +225,10 @@
                                     </div>
                                 {/if}
 
-                                {* Badge note *}
-                                {if $objMovie->getRating()}
+                                {* Badge note /5 *}
+                                {if $objMovie->getRating() > 0}
                                     <span class="position-absolute top-0 end-0 m-2 badge bg-warning text-dark rounded-pill shadow-sm">
-                                        <i class="bi bi-star-fill me-1"></i>{$objMovie->getRating()}
+                                        <i class="bi bi-star-fill me-1"></i>{$objMovie->getRating()|string_format:"%.1f"}/5
                                     </span>
                                 {/if}
 

@@ -276,8 +276,8 @@
         * @param string $strCountry the new country name
         */
 		
-		public function setCountry(string $strCountry){
-			$this->_country = $strCountry;
+		public function setCountry(?string $strCountry){
+			$this->_country = $strCountry ?? '';
 		}
 
 		/**
