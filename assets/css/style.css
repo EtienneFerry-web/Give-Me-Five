@@ -1,7 +1,38 @@
+:root {
+    --bg:           #ffffff;
+    --bg-secondary: #f8f9fa;
+    --text:         #000000;
+    --text-muted:   #6c757d;
+    --border:       #000000;
+    --border-light: #dee2e6;
+    --nav-bg:       #000000;
+    --card-bg:      #ffffff;
+    --input-bg:     #ffffff;
+    --suggestion-bg:#ffffff;
+    --comment-bg:   #ffffff;
+    --spoiler-bg:   #ffffff;
+}
+
+[data-theme="dark"] {
+    --bg:           #121212;
+    --bg-secondary: #1e1e1e;
+    --text:         #e8e8e8;
+    --text-muted:   #9e9e9e;
+    --border:       #444444;
+    --border-light: #333333;
+    --nav-bg:       #1a1a1a;
+    --card-bg:      #1e1e1e;
+    --input-bg:     #2a2a2a;
+    --suggestion-bg:#2a2a2a;
+    --comment-bg:   #1e1e1e;
+    --spoiler-bg:   #1e1e1e;
+}
+
 body{
     font-family:  Helvetica, sans-serif;
-    background-color: #ffffff;
-    color: #000000;
+    background-color: var(--bg);
+    color: var(--text);
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 h1{
@@ -32,7 +63,7 @@ label{
 .spanMovie{
     font-size: clamp(1rem, 2vw, 1.25rem);
     font-weight: 400 ;
-    color: #000000;
+    color: var(--text);
 }
 
 #hero .logo img{
@@ -55,7 +86,7 @@ nav a{
 .nav-link{
     font-weight: 300;
     font-size: clamp(1rem ,3vw, 1.25rem);
-    color: #000000;
+    color: var(--text);
     transition: all 0.3s ease-out;
     cursor: pointer;
 }
@@ -68,14 +99,13 @@ nav a{
 .dropdown button{
     font-weight: 300;
     font-size: clamp(1rem ,3vw, 1.25rem);
-    color: #000000;
-
+    color: var(--text);
 }
 
 .active{
     opacity: 0.7;
-    background-color: #fffFFF !important;
-    color: #000000 !important;
+    background-color: var(--bg) !important;
+    color: var(--text) !important;
 }
 
 .active:hover{
@@ -88,9 +118,9 @@ nav a{
     text-transform: uppercase;
     padding: clamp(0.75rem, 2vw, 1rem);
     font-size: 1rem;
-    color: #ffffff;
-    background-color: #000000;
-    border: 2px solid #000000;
+    color: var(--bg);
+    background-color: var(--text);
+    border: 2px solid var(--text);
     border-radius: 10px;
     font-weight: 700;
     text-decoration: none;
@@ -98,8 +128,8 @@ nav a{
 }
 
 .btnCustom:hover{
-    background-color: #ffffff;
-    color: #000000;
+    background-color: var(--bg);
+    color: var(--text);
     transform: scale(0.9);
 }
 .dropdown-menu {
@@ -227,7 +257,7 @@ nav a{
 
  a.link{
     text-transform: uppercase ;
-    color: #000000 ;
+    color: var(--text);
     text-decoration: none;
 }
  a.link:hover{
@@ -326,11 +356,12 @@ form#formSearch > button{
 }
 
 #userComment .comment{
-    border: 2px #000000 solid;
+    border: 2px var(--border) solid;
     border-radius: 10px 40px 40px 40px;
     text-align: start;
     padding: 1rem;
     position: relative;
+    background-color: var(--comment-bg);
 }
 
 #userComment .comment :is(form, input, label){
@@ -341,16 +372,15 @@ form#formSearch > button{
 
 .comment-spoiler{
     position: absolute;
-    inset: 0; /* top:0; right:0; bottom:0; left:0 */
+    inset: 0;
     border-radius: 10px 40px 40px 40px;
-    background-color: white;
+    background-color: var(--spoiler-bg);
     z-index: 10;
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
     cursor: pointer;
-
 }
 
 
@@ -460,26 +490,25 @@ width: 100%;
     width: 100%;
     padding: 12px 20px;
     font-size: 16px;
-    border: 1px solid #dfe1e5;
+    border: 1px solid var(--border-light);
     border-radius: 24px;
     outline: none;
+    background-color: var(--input-bg);
+    color: var(--text);
 }
 
 #searchBar:focus {
     box-shadow: 0 1px 6px rgba(32,33,36,0.28);
     border-bottom: none;
-
 }
-
-
 
 .suggestions-list {
     position: absolute;
     top: 100%;
     left: 0;
     right: 0;
-    background: white;
-    border: 1px solid #dfe1e5;
+    background: var(--suggestion-bg);
+    border: 1px solid var(--border-light);
     border-top: none;
     border-radius: 0 0 24px 24px;
     box-shadow: 0 2px 6px rgba(32,33,36,0.28);
@@ -489,6 +518,7 @@ width: 100%;
     width: auto;
     overflow: hidden;
     transition: all 3s;
+    color: var(--text);
 }
 
 .suggestion-item {
@@ -521,4 +551,85 @@ width: 100%;
 
 .overlay-container:hover img {
     filter: brightness(50%);
+}
+
+/* ── Dark mode overrides ── */
+[data-theme="dark"] nav {
+    background-color: var(--nav-bg) !important;
+}
+[data-theme="dark"] .card,
+[data-theme="dark"] .modal-content,
+[data-theme="dark"] .dropdown-menu,
+[data-theme="dark"] .accordion-item,
+[data-theme="dark"] .accordion-button {
+    background-color: var(--card-bg) !important;
+    color: var(--text) !important;
+    border-color: var(--border-light) !important;
+}
+[data-theme="dark"] .accordion-button:not(.collapsed) {
+    background-color: var(--bg-secondary) !important;
+}
+[data-theme="dark"] .accordion-button::after {
+    filter: invert(1);
+}
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .form-select {
+    background-color: var(--input-bg) !important;
+    color: var(--text) !important;
+    border-color: var(--border-light) !important;
+}
+[data-theme="dark"] .form-control::placeholder {
+    color: var(--text-muted);
+}
+[data-theme="dark"] .input-group-text {
+    background-color: var(--input-bg) !important;
+    border-color: var(--border-light) !important;
+    color: var(--text) !important;
+}
+[data-theme="dark"] .text-muted {
+    color: var(--text-muted) !important;
+}
+[data-theme="dark"] .bg-white,
+[data-theme="dark"] .bg-light {
+    background-color: var(--bg-secondary) !important;
+}
+[data-theme="dark"] .border,
+[data-theme="dark"] .border-bottom,
+[data-theme="dark"] .border-top {
+    border-color: var(--border-light) !important;
+}
+[data-theme="dark"] hr {
+    border-color: var(--border-light);
+}
+[data-theme="dark"] .dropdown-item {
+    color: var(--text);
+}
+[data-theme="dark"] .dropdown-item:hover {
+    background-color: var(--bg-secondary);
+}
+[data-theme="dark"] .btn-close {
+    filter: invert(1);
+}
+[data-theme="dark"] .btn-outline-dark {
+    color: var(--text) !important;
+    border-color: var(--text) !important;
+}
+[data-theme="dark"] .btn-outline-dark:hover {
+    background-color: var(--text) !important;
+    color: var(--bg) !important;
+}
+[data-theme="dark"] #movie > :first-child,
+[data-theme="dark"] #actor > :first-child {
+    border-color: var(--border-light) !important;
+}
+[data-theme="dark"] #userComment h3,
+[data-theme="dark"] #user > div:first-of-type,
+[data-theme="dark"] #user .spanMovie {
+    border-color: var(--border-light) !important;
+}
+[data-theme="dark"] .sticky-top.card {
+    background-color: var(--card-bg) !important;
+}
+[data-theme="dark"] .shadow-sm {
+    box-shadow: 0 .125rem .25rem rgba(0,0,0,.5) !important;
 }

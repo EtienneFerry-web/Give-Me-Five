@@ -12,6 +12,7 @@
     {if isset($smarty.session.user)}
         <script src="{$smarty.env.BASE_URL}assets/js/activity.js"></script>
     {/if}
+    <script src="{$smarty.env.BASE_URL}assets/js/darkMode.js"></script>
     <script src="{$smarty.env.BASE_URL}assets/js/autoCompletion.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     {block name="js"}{/block}

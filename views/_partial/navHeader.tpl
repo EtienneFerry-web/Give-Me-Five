@@ -1,4 +1,9 @@
 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+    <li class="nav-item my-auto">
+        <button id="darkModeToggle" class="nav-link border-0 bg-transparent" title="Mode sombre" style="cursor:pointer;">
+            <i class="bi bi-moon-fill" id="darkModeIcon"></i>
+        </button>
+    </li>
     {if !isset($smarty.session.user)}
         <li class="nav-item my-auto"><a class="nav-link {$strView ==="login" ? "active" : ""}" href="{$smarty.env.BASE_URL}user/login">Connexion</a></li>
         <li class="nav-item my-auto"><a class="nav-link {$strView ==="createAccount" ? "active" : ""}" href="{$smarty.env.BASE_URL}user/createAccount">Inscription</a></li>
