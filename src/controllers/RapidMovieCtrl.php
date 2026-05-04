@@ -2,6 +2,7 @@
 namespace App\Controllers;
 
 use App\Models\RapidMovieModel;
+use App\Models\MovieModel;
 use App\Entities\MovieEntity;
 
 /**
@@ -110,9 +111,12 @@ class RapidMovieCtrl extends MotherCtrl {
             }
         }
 
-        // Hydratation en entités
+        // Enregistrement en BDD + hydratation en entités
         $arrMovieToDisplay = [];
+        $objMovieModel     = new MovieModel();
         foreach ($arrMovies as $arrDetMovie) {
+            // Remplace l'ID API par l'ID entier local → les cartes pointent vers moviePage/{int}
+            $arrDetMovie['mov_id'] = $objMovieModel->findOrCreateApiMovie($arrDetMovie);
             $objMovie = new MovieEntity('mov_');
             $objMovie->hydrate($arrDetMovie);
             $arrMovieToDisplay[] = $objMovie;

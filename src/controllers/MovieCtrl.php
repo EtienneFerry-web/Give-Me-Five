@@ -30,11 +30,14 @@
         public function home(){
 
             $objContentModel 	= new RapidMovieModel;
+            $objMovieModel      = new MovieModel;
 			$arrMovie		    = $objContentModel->newMovie();
 
 			$arrMovieToDisplay	= array();
 
 			foreach($arrMovie as $arrDetMovie){
+                // Enregistre le film en BDD si nécessaire → ID entier local
+                $arrDetMovie['mov_id'] = $objMovieModel->findOrCreateApiMovie($arrDetMovie);
 				$objContent = new MovieEntity('mov_');
 				$objContent->hydrate($arrDetMovie);
 
@@ -79,8 +82,10 @@
 
             // Hydratation dans des MovieEntity (les getters sont utilisés par la vue)
             $arrMovieToDisplay = [];
+            $objMovieModel     = new MovieModel;
 
             foreach ($arrRawMovies as $arrDetMovie) {
+                $arrDetMovie['mov_id'] = $objMovieModel->findOrCreateApiMovie($arrDetMovie);
                 $objContent = new MovieEntity('mov_');
                 $objContent->hydrate($arrDetMovie);
                 $arrMovieToDisplay[] = $objContent;
@@ -405,16 +410,23 @@
             $objMovieModel 	= new MovieModel;
             $objRapidModel 	= new RapidMovieModel;
 
-            // ID non-numérique = identifiant API (ex: "tt1234567")
-            // On enregistre le film localement et on redirige vers l'ID entier.
+            // Filet de sécurité : ID non-numérique = identifiant API externe
+            // (normalement les cartes pointent déjà vers l'ID local entier)
             if (!is_numeric($_GET['id'] ?? '')) {
-                $arrApiData = $objRapidModel->getMovieById($_GET['id']);
-                if (!$arrApiData) {
-                    $this->_redirect("error/err404");
+                // Cherche si déjà enregistré localement
+                $existing = $objMovieModel->findMovieByApiId($_GET['id']);
+                if ($existing) {
+                    $this->_redirect("movie/moviePage/" . $existing['mov_id']);
                     return;
                 }
-                $intLocalId = $objMovieModel->findOrCreateApiMovie($arrApiData);
-                $this->_redirect("movie/moviePage/" . $intLocalId);
+                // Sinon tente de récupérer via API et enregistre
+                $arrApiData = $objRapidModel->getMovieById($_GET['id']);
+                if ($arrApiData) {
+                    $intLocalId = $objMovieModel->findOrCreateApiMovie($arrApiData);
+                    $this->_redirect("movie/moviePage/" . $intLocalId);
+                } else {
+                    $this->_redirect("error/err404");
+                }
                 return;
             }
 
