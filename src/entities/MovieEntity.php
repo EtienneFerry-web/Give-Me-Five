@@ -13,17 +13,15 @@
 		private string  $_release_date = '';
 		private string  $_trailer_url ='';
 		private int     $_countryId = 0;
-		private string  $_country;
+		private string  $_country = '';
 		private int     $_categoriesId = 0;
-		private string  $_categories;
+		private string  $_categories = '';
 		private string  $_length='';
-		//private string  $_func;
-		private int     $_like;
-		private float   $_rating;
-		//private string  $_nationality;
-		private int	    $_user_liked;
-		private ?float	$_note_user;
-		private int     $_reported;
+		private int     $_like = 0;
+		private float   $_rating = 0.0;
+		private int	    $_user_liked = 0;
+		private ?float	$_note_user = null;
+		private int     $_reported = 0;
 		private int 	$_nb_comments = 0;
 		private ?string $_published_at = NULL;
 
@@ -182,6 +180,10 @@
         */
 
 		public function setRelease_date(string $strCreatedate){
+			// Normalize year-only values from the API (e.g. "2023" → "2023-01-01")
+			if (preg_match('/^\d{4}$/', $strCreatedate)) {
+				$strCreatedate .= '-01-01';
+			}
 			$this->_release_date = $strCreatedate;
 		}
 
@@ -191,17 +193,19 @@
         * @return string the formatted date
         */
 
-		public function getDateFormat(string $strFormat = "fr_FR"){
-
-			$objDate	= new DateTime($this->_release_date);
-
-			$objDateFormatter	= new IntlDateFormatter(
-                $strFormat, 
-                IntlDateFormatter::LONG,  
-                IntlDateFormatter::NONE, 
+		public function getDateFormat(string $strFormat = "fr_FR"): string {
+			if (empty($this->_release_date)) return '';
+			try {
+				$objDate = new DateTime($this->_release_date);
+			} catch (\Exception $e) {
+				return $this->_release_date;
+			}
+			$objDateFormatter = new IntlDateFormatter(
+                $strFormat,
+                IntlDateFormatter::LONG,
+                IntlDateFormatter::NONE,
             );
-			$strDate	= $objDateFormatter->format($objDate);
-			return $strDate;
+			return $objDateFormatter->format($objDate) ?: $this->_release_date;
 		}
 
 		/**

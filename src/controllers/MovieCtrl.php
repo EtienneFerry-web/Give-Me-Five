@@ -405,14 +405,21 @@
             $objMovieModel 	= new MovieModel;
             $objRapidModel 	= new RapidMovieModel;
 
-			$arrMovie = $objMovieModel->findMovie($_GET['id'], $_SESSION['user']['user_id']??0);
-			
-            if(!$arrMovie){
-                $arrMovie = $objRapidModel->getMovieById($_GET['id']);
-                $arrMovieImages = []; // No extra images for API items for now
-            } else {
-                $arrMovieImages = $objMovieModel->selectImageMovie($_GET['id']);
+            // ID non-numérique = identifiant API (ex: "tt1234567")
+            // On enregistre le film localement et on redirige vers l'ID entier.
+            if (!is_numeric($_GET['id'] ?? '')) {
+                $arrApiData = $objRapidModel->getMovieById($_GET['id']);
+                if (!$arrApiData) {
+                    $this->_redirect("error/err404");
+                    return;
+                }
+                $intLocalId = $objMovieModel->findOrCreateApiMovie($arrApiData);
+                $this->_redirect("movie/moviePage/" . $intLocalId);
+                return;
             }
+
+			$arrMovie = $objMovieModel->findMovie((int)$_GET['id'], $_SESSION['user']['user_id']??0);
+            $arrMovieImages = $arrMovie ? $objMovieModel->selectImageMovie($_GET['id']) : [];
 
 			if(!$arrMovie){
 				$this->_redirect("error/err404");

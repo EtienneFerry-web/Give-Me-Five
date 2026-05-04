@@ -53,16 +53,32 @@ class RapidMovieModel extends Connect
      */
     private function mapToShow(array $item): array
     {
+        $year        = $item['releaseYear'] ?? '';
+        $releaseDate = $year ? $year . '-01-01' : '';
+
+        $ytId        = $item['youtubeTrailerVideoId'] ?? '';
+        $trailerUrl  = $ytId ? 'https://www.youtube.com/watch?v=' . $ytId : '';
+
+        $photo = $item['imageSet']['verticalPoster']['w480']
+              ?? $item['imageSet']['verticalPoster']['w240']
+              ?? '';
+
         return [
+            'mov_api_id'      => $item['id'] ?? '',
             'mov_id'          => $item['id'] ?? '',
             'mov_title'       => $item['title'] ?? '',
             'mov_description' => $item['overview'] ?? '',
-            'mov_photo'       => $item['imageSet']['verticalPoster']['w480'] ?? $item['imageSet']['verticalPoster']['w240'] ?? '',
+            'mov_photo'       => $photo,
             'mov_rating'      => (float)(($item['rating'] ?? 0) / 10),
-            'mov_release_date'=> $item['releaseYear'] ?? '',
-            'mov_trailer_url' => $item['youtubeTrailerVideoId'] ?? '',
+            'mov_release_date'=> $releaseDate,
+            'mov_trailer_url' => $trailerUrl,
             'mov_like'        => 0,
-            'is_api'          => true
+            'mov_reported'    => 0,
+            'mov_user_liked'  => 0,
+            'mov_note_user'   => null,
+            'mov_country'     => '',
+            'mov_length'      => '',
+            'is_api'          => true,
         ];
     }
 

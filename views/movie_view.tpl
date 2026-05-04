@@ -28,9 +28,15 @@
     <h1 class="d-md-block d-none mb-3">{$objMovie->getTitle()}</h1>
 
     <div class="mb-3">
-        <span class="spanMovie d-block py-1"><strong>Durée :</strong> {$objMovie->getLength()}</span>
-        <span class="spanMovie d-block py-1"><strong>Date de sortie :</strong> {$objMovie->getDateFormat()}</span>
-        <span class="spanMovie d-block py-1"><strong>Pays :</strong> {$objMovie->getCountry()}</span>
+        {if $objMovie->getLength()}
+            <span class="spanMovie d-block py-1"><strong>Durée :</strong> {$objMovie->getLength()}</span>
+        {/if}
+        {if $objMovie->getRelease_date()}
+            <span class="spanMovie d-block py-1"><strong>Date de sortie :</strong> {$objMovie->getDateFormat()}</span>
+        {/if}
+        {if $objMovie->getCountry()}
+            <span class="spanMovie d-block py-1"><strong>Pays :</strong> {$objMovie->getCountry()}</span>
+        {/if}
     </div>
 
     <p class="px-2 px-md-0 mb-4">{$objMovie->getDescription()}</p>
@@ -51,7 +57,9 @@
     </div>
 
     <div class="d-flex flex-wrap align-items-center gap-3 justify-content-center justify-content-md-start mb-4">
+        {if $objMovie->getTrailer()}
         <a href="{$objMovie->getTrailer()}" target="_blank" class="spanMovie link">Voir le trailer &#8599;</a>
+        {/if}
         <a id="shareMovie" class="spanMovie link" style="cursor:pointer;">Partager &#8599;</a>
         {if $curDate->format('Y-m-d') < $objMovie->getRelease_date()}
         <a href="{$smarty.env.BASE_URL}movie/addToCalendar/{$objMovie->getId()}" 

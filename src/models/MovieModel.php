@@ -166,6 +166,72 @@
          * @return array An associative array containing movie details and user-specific status.
          */
 
+        /**
+         * Finds a movie by its external API ID.
+         * @param string $apiId The API identifier (e.g. "tt1234567").
+         * @return array|bool Movie row or false.
+         */
+        public function findMovieByApiId(string $apiId): array|bool
+        {
+            $stmt = $this->_db->prepare(
+                "SELECT mov_id FROM movies WHERE mov_api_id = :apiId LIMIT 1"
+            );
+            $stmt->bindValue(':apiId', $apiId, PDO::PARAM_STR);
+            $stmt->execute();
+            return $stmt->fetch();
+        }
+
+        /**
+         * Inserts an API movie into the local DB (if not already present) and returns its local integer ID.
+         * This allows all existing features (comments, likes, reports) to work on API movies.
+         * @param array $apiData Data from RapidMovieModel::mapToShow().
+         * @return int Local integer movie ID.
+         */
+        public function findOrCreateApiMovie(array $apiData): int
+        {
+            $apiId = $apiData['mov_api_id'] ?? '';
+
+            // Already registered?
+            $existing = $this->findMovieByApiId($apiId);
+            if ($existing) {
+                return (int)$existing['mov_id'];
+            }
+
+            $releaseDate = $apiData['mov_release_date'] ?: date('Y') . '-01-01';
+            $photo       = $apiData['mov_photo'] ?? '';
+            $trailer     = $apiData['mov_trailer_url'] ?? '';
+
+            // Insert minimal movie record
+            $stmt = $this->_db->prepare(
+                "INSERT INTO movies
+                    (mov_api_id, mov_title, mov_original_title, mov_description,
+                     mov_release_date, mov_length, mov_trailer_url, mov_published_at)
+                 VALUES
+                    (:apiId, :title, :title, :desc, :releaseDate, '00:00:00', :trailer, NOW())"
+            );
+            $stmt->bindValue(':apiId',       $apiId,                     PDO::PARAM_STR);
+            $stmt->bindValue(':title',       $apiData['mov_title'] ?? '', PDO::PARAM_STR);
+            $stmt->bindValue(':desc',        $apiData['mov_description'] ?? '', PDO::PARAM_STR);
+            $stmt->bindValue(':releaseDate', $releaseDate,               PDO::PARAM_STR);
+            $stmt->bindValue(':trailer',     $trailer,                   PDO::PARAM_STR);
+            $stmt->execute();
+
+            $localId = (int)$this->_db->lastInsertId();
+
+            // Store the poster URL in the photos table
+            if ($photo !== '') {
+                $stmtPhoto = $this->_db->prepare(
+                    "INSERT IGNORE INTO photos (pho_photo, pho_type, pho_mov_id)
+                     VALUES (:photo, 'Affiche', :movId)"
+                );
+                $stmtPhoto->bindValue(':photo', $photo,   PDO::PARAM_STR);
+                $stmtPhoto->bindValue(':movId', $localId, PDO::PARAM_INT);
+                $stmtPhoto->execute();
+            }
+
+            return $localId;
+        }
+
         public function findMovie(int $idMovie, int $intUserId = 0): array | bool {
 
             $strRq  = " SELECT movies.*,
